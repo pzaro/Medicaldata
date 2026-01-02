@@ -60,7 +60,7 @@
             <form onsubmit="saveDoctor(event)" class="space-y-4">
                 
                 <div class="relative bg-blue-50 p-4 rounded-xl border border-blue-100 shadow-inner">
-                    <label class="text-xs font-bold text-blue-800 uppercase mb-2 block"><i class="fa-solid fa-magnifying-glass"></i> Google Search (Maps)</label>
+                    <label class="text-xs font-bold text-blue-800 uppercase mb-2 block"><i class="fa-solid fa-magnifying-glass"></i> Google Maps Αναζήτηση</label>
                     <input type="text" id="google-search" placeholder="Γράψε όνομα ιατρού..." class="w-full p-3 border-2 border-blue-200 rounded-lg focus:border-blue-500 outline-none shadow-sm bg-white">
                 </div>
 
@@ -84,7 +84,7 @@
                             <datalist id="greekNomoiList"></datalist>
                         </div>
                         <div>
-                            <label class="text-xs font-bold text-teal-800 ml-1">Πόλη</label>
+                            <label class="text-xs font-bold text-teal-800 ml-1">Πόλη / Χωριό</label>
                             <input type="text" id="city" list="citiesList" class="w-full p-2 border rounded bg-white focus:ring-2 focus:ring-teal-500 outline-none text-sm" placeholder="Πόλη">
                             <datalist id="citiesList"></datalist>
                         </div>
@@ -156,19 +156,16 @@
     <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAr8wchlfC4YXxTHZq2wk82BtIN3xMyeLg&libraries=places&callback=initMap" async defer></script>
 
     <script>
-        // --- ΕΝΗΜΕΡΩΜΕΝΟ URL ΑΠΟ ΤΟΝ ΧΡΗΣΤΗ ---
-        const API_URL = "https://script.google.com/macros/s/AKfycbynJfYNVGOoLVn-QVzMv__kZ-Eik2o8IpsSA5wp9ZoJPTobW9YiFXxQR-u3vKMGuOY3/exec";
+        // --- ΤΟ ΝΕΟ ΣΟΥ LINK ---
+        const API_URL = "https://script.google.com/macros/s/AKfycbz3-6c0DqFdbWS0UZjRY6FvkEradN2h2gvbYoT6zD7QNR__DGjyFQlk2SV6i8tnyT/exec";
         
         let doctors = [];
         let placesService;
 
-        // --- NEW FUNCTION: SEARCH CONTACTS ---
+        // --- ΑΝΑΖΗΤΗΣΗ ΕΠΑΦΩΝ GOOGLE ---
         async function searchGoogleContacts() {
             const query = document.getElementById('name').value;
-            if (!query) {
-                alert("Παρακαλώ γράψτε ένα όνομα στο πεδίο πριν πατήσετε το κουμπί.");
-                return;
-            }
+            if (!query) { alert("Παρακαλώ γράψτε ένα όνομα στο πεδίο."); return; }
 
             const btn = document.querySelector('button[onclick="searchGoogleContacts()"]');
             const originalIcon = btn.innerHTML;
@@ -176,13 +173,11 @@
             btn.disabled = true;
 
             try {
-                // Καλούμε το Google Script με action=searchContacts
                 const response = await fetch(`${API_URL}?action=searchContacts&query=${encodeURIComponent(query)}`);
                 const contacts = await response.json();
 
                 if (contacts && contacts.length > 0) {
-                    const c = contacts[0]; // Παίρνουμε την 1η επαφή που βρέθηκε
-                    
+                    const c = contacts[0];
                     if (confirm(`Βρέθηκε επαφή: ${c.name}\nΝα συμπληρωθούν τα στοιχεία;`)) {
                         document.getElementById('name').value = c.name;
                         if(c.mobile) document.getElementById('mobile').value = c.mobile;
@@ -191,11 +186,11 @@
                         if(c.address) document.getElementById('address').value = c.address;
                     }
                 } else {
-                    alert("Δεν βρέθηκε επαφή με αυτό το όνομα.");
+                    alert("Δεν βρέθηκε επαφή.");
                 }
             } catch (error) {
                 console.error(error);
-                alert("Σφάλμα σύνδεσης. Βεβαιωθείτε ότι το Script είναι ενημερωμένο.");
+                alert("Σφάλμα σύνδεσης με τις επαφές.");
             } finally {
                 btn.innerHTML = originalIcon;
                 btn.disabled = false;
