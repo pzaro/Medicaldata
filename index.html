@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+<html lang="el">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cloud Medical CRM</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        body { font-family: system-ui, -apple-system, sans-serif; background-color: #f0fdfa; }
+        .spinner { border: 3px solid rgba(255,255,255,0.3); border-radius: 50%; border-top: 3px solid white; width: 20px; height: 20px; animation: spin 1s linear infinite; }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+        /* Loading Overlay */
+        #loader { position: fixed; top:0; left:0; width:100%; height:100%; background: rgba(255,255,255,0.9); z-index: 100; display: flex; justify-content: center; align-items: center; flex-direction: column; backdrop-filter: blur(5px); }
+    </style>
+</head>
+<body class="pb-24">
+
+    <div id="loader">
+        <div class="animate-spin rounded-full h-16 w-16 border-t-4 border-b-4 border-teal-600 mb-4"></div>
+        <p class="text-teal-800 font-bold text-lg animate-pulse">Συγχρονισμός με Google Sheet...</p>
+        <p class="text-xs text-gray-500 mt-2">Παρακαλώ περιμένετε</p>
+    </div>
+
+    <header class="bg-gradient-to-r from-teal-600 to-teal-500 text-white p-4 sticky top-0 z-50 shadow-lg flex justify-between items-center">
+        <h1 class="text-xl font-bold tracking-wide"><i class="fa-solid fa-cloud-arrow-up mr-2"></i>MediCloud</h1>
+        <div class="flex gap-2">
+            <button onclick="loadDoctors(true)" class="bg-teal-700 text-white w-10 h-10 rounded-full flex items-center justify-center hover:bg-teal-800 shadow-md transition active:scale-95">
+                <i class="fa-solid fa-rotate"></i>
+            </button>
+            <button onclick="toggleForm()" class="bg-white text-teal-600 px-4 py-2 rounded-full text-sm font-bold shadow-md hover:bg-gray-100 transition active:scale-95">
+                <i class="fa-solid fa-plus"></i> Νέος
+            </button>
+        </div>
+    </header>
+
+    <main class="container mx-auto p-4 max-w-2xl">
+        
+        <div id="doctorForm" class="hidden bg-white p-6 rounded-2xl shadow-xl mb-6 border-t-4 border-teal-500 slide-in">
+            <h2 class="text-xl font-bold mb-4 text-gray-700">Νέα Καταχώρηση</h2>
+            <form onsubmit="saveDoctor(event)" class="space-y-4">
+                <input type="text" id="name" placeholder="Ονοματεπώνυμο Ιατρού" required class="w-full p-3 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-teal-500 transition">
+                <input type="text" id="address" placeholder="Διεύθυνση (Οδός, Αριθμός, Περιοχή)" class="w-full p-3 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-teal-500 transition">
+                
+                <div class="grid grid-cols-2 gap-3">
+                    <input type="tel" id="mobile" placeholder="Κινητό Τηλέφωνο" class="w-full p-3 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-teal-500 transition">
+                    <input type="tel" id="landline" placeholder="Σταθερό Τηλέφωνο" class="w-full p-3 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-teal-500 transition">
+                </div>
+                
+                <input type="email" id="email" placeholder="Email (προαιρετικό)" class="w-full p-3 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-teal-500 transition">
+                
+                <div class="mt-2">
+                    <label class="block text-sm font-bold text-gray-600 mb-2">Ειδικότητα:</label>
+                    <div class="grid grid-cols-2 gap-2 text-sm">
+                        <label class="flex items-center p-2 border rounded-lg hover:bg-gray-50 cursor-pointer"><input type="checkbox" name="specialty" value="Παθολόγος" class="mr-2 accent-teal-600 w-4 h-4"> Παθολόγος</label>
+                        <label class="flex items-center p-2 border rounded-lg hover:bg-gray-50 cursor-pointer"><input type="checkbox" name="specialty" value="Καρδιολόγος" class="mr-2 accent-teal-600 w-4 h-4"> Καρδιολόγος</label>
+                        <label class="flex items-center p-2 border rounded-lg hover:bg-gray-50 cursor-pointer"><input type="checkbox" name="specialty" value="Οδοντίατρος" class="mr-2 accent-teal-600 w-4 h-4"> Οδοντίατρος</label>
+                        <label class="flex items-center p-2 border rounded-lg hover:bg-gray-50 cursor-pointer"><input type="checkbox" name="specialty" value="Οφθαλμίατρος" class="mr-2 accent-teal-600 w-4 h-4"> Οφθαλμίατρος</label>
+                        <label class="flex items-center p-2 border rounded-lg hover:bg-gray-50 cursor-pointer"><input type="checkbox" name="specialty" value="Ορθοπεδικός" class="mr-2 accent-teal-600 w-4 h-4"> Ορθοπεδικός</label>
+                        <label class="flex items-center p-2 border rounded-lg hover:bg-gray-50 cursor-pointer"><input type="checkbox" name="specialty" value="Δερματολόγος" class="mr-2 accent-teal-600 w-4 h-4"> Δερματολόγος</label>
+                    </div>
+                </div>
+
+                <textarea id="notes" placeholder="Σημειώσεις, ωράριο, εντυπώσεις..." class="w-full p-3 bg-gray-50 border border-gray-200 rounded-xl h-24 focus:outline-none focus:ring-2 focus:ring-teal-500 transition"></textarea>
+
+                <div class="flex justify-end gap-3 mt-4">
+                    <button type="button" onclick="toggleForm()" class="px-5 py-2 text-gray-500 hover:text-gray-700 font-medium transition">Άκυρο</button>
+                    <button type="submit" id="saveBtn" class="bg-teal-600 text-white px-8 py-2 rounded-xl shadow-lg hover:bg-teal-700 font-bold transition transform hover:-translate-y-1">
+                        Αποθήκευση
+                    </button>
+                </div>
+            </form>
+        </div>
+
+        <div id="doctorsList" class="space-y-5"></div>
+    </main>
+
+    <script>
+        // --- ΡΥΘΜΙΣΕΙΣ ---
+        // Το URL που έδωσες:
+        const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbypusxjwzqYMoygudV3nvcV_R8Nqno2y618hmL0HR_PXPmNiYAHPUNQHYwEZP1rsZyM/exec"; 
+
+        // Global State
+        let localDoctors = []; 
+
+        document.addEventListener('DOMContentLoaded', () => loadDoctors(true));
+
+        function toggleForm() {
+            document.getElementById('doctorForm').classList.toggle('hidden');
+        }
+
+        function showLoader(show) {
+            const loader = document.getElementById('loader');
+            if(show) loader.classList.remove('hidden'); else loader.classList.add('hidden');
+        }
+
+        // --- API FUNCTIONS ---
+
+        async function loadDoctors(forceRefresh = false) {
+            showLoader(true);
+            try {
+                // Φόρτωση από Google Sheet
+                const response = await fetch(GOOGLE_SCRIPT_URL);
+                const data = await response.json();
+                
+                // Ταξινόμηση ώστε οι νεότερες εγγραφές να είναι πάνω πάνω
+                localDoctors = data.sort((a, b) => b.id - a.id);
+                renderDoctors();
+            } catch (error) {
+                alert("Σφάλμα σύνδεσης με το Google Sheet! Ελέγξτε τη σύνδεση internet.");
+                console.error(error);
+            } finally {
+                showLoader(false);
+            }
+        }
+
+        async function syncToCloud() {
+            showLoader(true);
+            try {
+                // Στέλνουμε ΟΛΗ τη λίστα για αποθήκευση
+                await fetch(GOOGLE_SCRIPT_URL, {
+                    method: 'POST',
+                    mode: 'no-cors', // Σημαντικό για να αποφύγουμε CORS errors σε μερικούς browsers
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ doctors: localDoctors })
+                });
+                
+                // Επειδή το no-cors δεν επιστρέφει απάντηση, κάνουμε reload για να βεβαιωθούμε
+                // (Μια μικρή καθυστέρηση βοηθάει το sheet να προλάβει να γράψει)
+                setTimeout(() => loadDoctors(), 1000);
+                
+            } catch (error) {
+                alert("Απέτυχε η αποθήκευση στο Cloud.");
+                console.error(error);
+                showLoader(false);
+            }
+        }
+
+        // --- UI FUNCTIONS ---
+
+        function saveDoctor(e) {
+            e.preventDefault();
+            
+            const specialtyCheckboxes = document.querySelectorAll('input[name="specialty"]:checked');
+            const specialties = Array.from(specialtyCheckboxes).map(cb => cb.value);
+
+            const newDoctor = {
+                id: Date.now(),
+                name: document.getElementById('name').value,
+                address: document.getElementById('address').value,
+                mobile: document.getElementById('mobile').value,
+                landline: document.getElementById('landline').value,
+                email: document.getElementById('email').value,
+                specialties: specialties,
+                notes: document.getElementById('notes').value,
+                visits: []
+            };
+
+            localDoctors.unshift(newDoctor); // Προσθήκη τοπικά για άμεση εμφάνιση
+            toggleForm();
+            document.querySelector('form').reset();
+            
+            // Αποθήκευση στο Cloud
+            syncToCloud();
+        }
+
+        async function addVisit(id) {
+            const input = document.getElementById(`visit-note-${id}`);
+            const text = input.value;
+            if (!text) return;
+
+            const docIndex = localDoctors.findIndex(d => d.id == id);
+            if (docIndex > -1) {
+                localDoctors[docIndex].visits.unshift({ 
+                    date: new Date().toLocaleDateString('el-GR'), 
+                    text: text 
+                });
+                
+                renderDoctors(); // Update UI immediately
+                await syncToCloud(); // Sync background
+            }
+        }
+
+        function deleteDoctor(id) {
+            if (confirm('Διαγραφή; (Θα αφαιρεθεί και από το Sheet)')) {
+                localDoctors = localDoctors.filter(d => d.id != id);
+                renderDoctors();
+                syncToCloud();
+            }
+        }
+
+        function renderDoctors() {
+            const list = document.getElementById('doctorsList');
+            list.innerHTML = '';
+
+            if (localDoctors.length === 0) {
+                 list.innerHTML = `
+                    <div class="flex flex-col items-center justify-center text-gray-400 mt-16 animate-pulse">
+                        <i class="fa-solid fa-folder-open text-5xl mb-3 text-teal-100"></i>
+                        <p class="text-lg">Η λίστα είναι κενή.</p>
+                        <p class="text-sm">Προσθέστε τον πρώτο σας ιατρό!</p>
+                    </div>`;
+                 return;
+            }
+
+            localDoctors.forEach(doc => {
+                const specialtyTags = doc.specialties.map(s => 
+                    `<span class="bg-teal-50 text-teal-700 text-xs font-semibold px-2 py-1 rounded-md border border-teal-100">${s}</span>`
+                ).join(' ');
+
+                const mapLink = doc.address 
+                    ? `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(doc.address)}` 
+                    : '#';
+
+                const card = `
+                    <div class="bg-white rounded-2xl shadow-sm p-6 relative border border-gray-100 hover:shadow-md transition duration-300">
+                         <button onclick="deleteDoctor(${doc.id})" class="absolute top-4 right-4 text-gray-300 hover:text-red-500 p-2 transition">
+                            <i class="fa-solid fa-trash-can"></i>
+                        </button>
+                        
+                        <div class="pr-8">
+                            <h3 class="text-xl font-bold text-gray-800">${doc.name}</h3>
+                            <div class="flex flex-wrap gap-2 mt-2 mb-4">${specialtyTags}</div>
+                        </div>
+
+                        <div class="flex gap-3 mb-4">
+                             ${doc.mobile ? `<a href="tel:${doc.mobile}" class="flex-1 flex items-center justify-center gap-2 bg-green-50 text-green-700 py-2.5 rounded-xl font-semibold border border-green-200 hover:bg-green-100 transition active:scale-95"><i class="fa-solid fa-phone"></i> Κλήση</a>` : ''}
+                             ${doc.address ? `<a href="${mapLink}" target="_blank" class="flex-1 flex items-center justify-center gap-2 bg-blue-50 text-blue-700 py-2.5 rounded-xl font-semibold border border-blue-200 hover:bg-blue-100 transition active:scale-95"><i class="fa-solid fa-location-dot"></i> GPS</a>` : ''}
+                        </div>
+
+                         <div class="space-y-2 text-sm text-gray-600 mb-4 bg-gray-50 p-3 rounded-xl">
+                            ${doc.landline ? `<p class="flex items-center gap-3"><i class="fa-solid fa-phone-flip w-4 text-center text-gray-400"></i> ${doc.landline}</p>` : ''}
+                            ${doc.email ? `<p class="flex items-center gap-3"><i class="fa-solid fa-envelope w-4 text-center text-gray-400"></i> ${doc.email}</p>` : ''}
+                            ${doc.address ? `<p class="flex items-center gap-3"><i class="fa-solid fa-map-pin w-4 text-center text-gray-400"></i> ${doc.address}</p>` : ''}
+                        </div>
+
+                        ${doc.notes ? `
+                        <div class="bg-yellow-50 p-3 rounded-xl text-sm text-gray-700 italic border-l-4 border-yellow-300 mb-4 shadow-sm">
+                            <i class="fa-solid fa-quote-left text-yellow-400 mr-2 text-xs"></i>${doc.notes}
+                        </div>` : ''}
+
+                        <div class="border-t border-gray-100 pt-3 mt-2">
+                             <details class="group">
+                                <summary class="cursor-pointer text-teal-600 text-sm font-bold flex items-center gap-2 p-1 hover:bg-teal-50 rounded transition select-none">
+                                    <i class="fa-solid fa-clock-rotate-left transition group-open:rotate-90"></i>
+                                    Ιστορικό Επισκέψεων (${doc.visits ? doc.visits.length : 0})
+                                </summary>
+                                <div class="mt-3 bg-gray-50 p-3 rounded-xl border border-gray-200">
+                                    <div class="flex gap-2 mb-3">
+                                        <input type="text" id="visit-note-${doc.id}" placeholder="Τι συνέβη στην επίσκεψη;" class="w-full p-2 text-sm border rounded-lg focus:outline-none focus:border-teal-500">
+                                        <button onclick="addVisit(${doc.id})" class="bg-teal-600 text-white w-10 rounded-lg hover:bg-teal-700 transition"><i class="fa-solid fa-check"></i></button>
+                                    </div>
+                                    <ul class="text-sm space-y-2 max-h-40 overflow-y-auto pr-1">
+                                        ${(doc.visits || []).map(v => `
+                                            <li class="flex flex-col bg-white p-2 rounded shadow-sm border border-gray-100">
+                                                <span class="text-xs font-bold text-teal-600 mb-1">${v.date}</span>
+                                                <span class="text-gray-700">${v.text}</span>
+                                            </li>`).join('')}
+                                    </ul>
+                                </div>
+                            </details>
+                        </div>
+                    </div>
+                `;
+                list.innerHTML += card;
+            });
+        }
+    </script>
+</body>
+</html>
