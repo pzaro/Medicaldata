@@ -3,16 +3,26 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>MediCloud Pro (Live)</title>
+    <title>MediCloud Pro (Final)</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         body { font-family: system-ui, -apple-system, sans-serif; background-color: #f0fdfa; }
-        .pac-container { border-radius: 8px; margin-top: 5px; box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1); border: 1px solid #e5e7eb; font-family: system-ui; z-index: 10000; }
+        
+        /* --- ΔΙΟΡΘΩΣΗ: Εμφάνιση λίστας Google Maps πάντα μπροστά --- */
+        .pac-container { 
+            z-index: 10000 !important; 
+            border-radius: 8px; 
+            margin-top: 5px; 
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1); 
+            border: 1px solid #e5e7eb; 
+            font-family: system-ui; 
+        }
         .pac-item { padding: 12px; font-size: 14px; cursor: pointer; border-bottom: 1px solid #f3f4f6; }
         .pac-item:hover { background-color: #f0fdfa; }
         .pac-item-query { font-size: 15px; font-weight: bold; color: #0f766e; }
         .pac-icon { display: none; }
+        
         @keyframes pulse-teal { 0%, 100% { opacity: 1; } 50% { opacity: .5; } }
         .animate-searching { animation: pulse-teal 1s cubic-bezier(0.4, 0, 0.6, 1) infinite; }
         .animate-fade-in { animation: fadeIn 0.3s ease-in-out; }
@@ -55,7 +65,7 @@
             </button>
         </div>
         
-        <div id="doctorForm" class="hidden bg-white p-6 rounded-2xl shadow-xl mb-6 border-t-4 border-teal-500 slide-in">
+        <div id="doctorForm" class="hidden bg-white p-6 rounded-2xl shadow-xl mb-6 border-t-4 border-teal-500 slide-in relative z-40">
             <h2 class="text-lg font-bold mb-4 text-gray-700">Νέα Καταχώρηση</h2>
             <form onsubmit="saveDoctor(event)" class="space-y-4">
                 
@@ -272,6 +282,7 @@
         function capitalizeWords(str) { return str ? str.replace(/\w\S*/g, txt => txt.charAt(0).toUpperCase() + txt.substr(1).toLowerCase()) : ""; }
 
         function initMap() {
+            console.log("Χάρτης φορτώθηκε");
             const datalist = document.getElementById('greekNomoiList');
             greekNomoi.forEach(nomos => { const option = document.createElement('option'); option.value = nomos; datalist.appendChild(option); });
 
