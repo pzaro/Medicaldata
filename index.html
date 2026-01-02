@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>MediCloud Pro (Vascular Update)</title>
+    <title>MediCloud Pro (Smart Format)</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
@@ -103,7 +103,7 @@
                             <label class="flex items-center p-2 bg-white border rounded hover:bg-gray-50 cursor-pointer"><input type="radio" name="specialty" value="Χειρουργός Ορθοπεδικός" class="mr-2 accent-teal-600"> Χειρ. Ορθοπεδικός</label>
                             <label class="flex items-center p-2 bg-white border rounded hover:bg-gray-50 cursor-pointer"><input type="radio" name="specialty" value="Ηπατολόγος" class="mr-2 accent-teal-600"> Ηπατολόγος</label>
                             <label class="flex items-center p-2 bg-white border rounded hover:bg-gray-50 cursor-pointer"><input type="radio" name="specialty" value="Γαστρεντερολόγος" class="mr-2 accent-teal-600"> Γαστρεντερολόγος</label>
-                            <label class="flex items-center p-2 bg-white border rounded hover:bg-gray-50 cursor-pointer"><input type="radio" name="specialty" value="Αγγειοχειρουργός - Αγγειολόγος" class="mr-2 accent-teal-600"> Αγγειοχειρουργός - Αγγειολόγος</label>
+                            <label class="flex items-center p-2 bg-white border rounded hover:bg-gray-50 cursor-pointer"><input type="radio" name="specialty" value="Αγγειοχειρουργός - Αγγειολόγος" class="mr-2 accent-teal-600"> Αγγειοχειρουργός</label>
                             <label class="flex items-center p-2 bg-white border rounded hover:bg-gray-50 cursor-pointer"><input type="radio" name="specialty" value="Άλλο" class="mr-2 accent-teal-600" checked> Άλλο</label>
                         </div>
                     </div>
@@ -141,6 +141,20 @@
             "Τρικάλων", "Φθιώτιδας", "Φλώρινας", "Φωκίδας", "Χαλκιδικής", 
             "Χανίων", "Χίου"
         ];
+
+        // --- Helper: Κανονικοποίηση Κειμένου (Αγνόηση τόνων/case) ---
+        function normalizeText(text) {
+            if (!text) return "";
+            return text.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase();
+        }
+
+        // --- Helper: Κεφαλαίο πρώτο γράμμα (Auto-Capitalize) ---
+        function capitalizeWords(str) {
+            if (!str) return "";
+            return str.replace(/\w\S*/g, function(txt){
+                return txt.charAt(0).toUpperCase() + txt.substr(1).toLowerCase();
+            });
+        }
 
         // --- Google Logic ---
         function initMap() {
@@ -196,7 +210,12 @@
                     
                     if (types.includes('administrative_area_level_2')) {
                         let extractedNomos = component.long_name.replace('Περιφερειακή Ενότητα ', '').replace('Νομός ', '');
-                        const match = greekNomoi.find(n => n.includes(extractedNomos) || extractedNomos.includes(n));
+                        
+                        // Smart Match με αγνόηση τόνων και case
+                        const match = greekNomoi.find(n => 
+                            normalizeText(n).includes(normalizeText(extractedNomos)) || 
+                            normalizeText(extractedNomos).includes(normalizeText(n))
+                        );
                         nomos = match || extractedNomos;
                     } else if (types.includes('administrative_area_level_1') && !nomos) {
                         nomos = component.long_name; 
@@ -226,21 +245,20 @@
         }
 
         function detectSpecialty(place) {
-            const nameLower = place.name.toLowerCase();
+            const nameNorm = normalizeText(place.name);
             const types = place.types || [];
             let foundSpec = 'Άλλο';
 
-            if (types.includes('dentist') || nameLower.includes('οδοντίατρ')) foundSpec = 'Γενικός Χειρουργός';
-            else if (nameLower.includes('οφθαλμίατρ') || nameLower.includes('οφθαλμολογ')) foundSpec = 'Γενικός Οικογενειακός Ιατρός';
-            else if (nameLower.includes('ορθοπεδικ') || nameLower.includes('ορθοπαιδικ')) foundSpec = 'Χειρουργός Ορθοπεδικός';
-            else if (nameLower.includes('καρδιολόγ')) foundSpec = 'Καρδιολόγος';
-            else if (nameLower.includes('γενικός') || nameLower.includes('οικογενειακ')) foundSpec = 'Γενικός Οικογενειακός Ιατρός';
-            else if (nameLower.includes('χειρουργ')) foundSpec = 'Γενικός Χειρουργός';
-            else if (nameLower.includes('ηπατολόγ')) foundSpec = 'Ηπατολόγος';
-            else if (nameLower.includes('γαστρεντερολόγ')) foundSpec = 'Γαστρεντερολόγος';
-            else if (nameLower.includes('παθολόγ')) foundSpec = 'Παθολόγος';
-            // NEW: Vascular Surgeon
-            else if (nameLower.includes('αγγειο') || nameLower.includes('vascular') || nameLower.includes('angio')) {
+            if (types.includes('dentist') || nameNorm.includes('οδοντιατρ')) foundSpec = 'Γενικός Χειρουργός';
+            else if (nameNorm.includes('οφθαλμιατρ') || nameNorm.includes('οφθαλμολογ')) foundSpec = 'Γενικός Οικογενειακός Ιατρός';
+            else if (nameNorm.includes('ορθοπεδικ') || nameNorm.includes('ορθοπαιδικ')) foundSpec = 'Χειρουργός Ορθοπεδικός';
+            else if (nameNorm.includes('καρδιολογ')) foundSpec = 'Καρδιολόγος';
+            else if (nameNorm.includes('γενικος') || nameNorm.includes('οικογενειακ')) foundSpec = 'Γενικός Οικογενειακός Ιατρός';
+            else if (nameNorm.includes('χειρουργ')) foundSpec = 'Γενικός Χειρουργός';
+            else if (nameNorm.includes('ηπατολογ')) foundSpec = 'Ηπατολόγος';
+            else if (nameNorm.includes('γαστρεντερολογ')) foundSpec = 'Γαστρεντερολόγος';
+            else if (nameNorm.includes('παθολόγ') || nameNorm.includes('παθολογ')) foundSpec = 'Παθολόγος';
+            else if (nameNorm.includes('αγγειο') || nameNorm.includes('vascular') || nameNorm.includes('angio')) {
                 foundSpec = 'Αγγειοχειρουργός - Αγγειολόγος';
             }
 
@@ -396,17 +414,24 @@
             const specElement = document.querySelector('input[name="specialty"]:checked');
             const specialty = specElement ? specElement.value : 'Άλλο';
 
+            // AUTO-CAPITALIZE INPUTS (Για ομοιομορφία στη λίστα)
+            // Παίρνουμε την τιμή και την κάνουμε "Capitalize Words"
+            const rawNomos = document.getElementById('nomos').value;
+            const rawCity = document.getElementById('city').value;
+            const rawName = document.getElementById('name').value;
+            // Δεν πειράζουμε τη διεύθυνση γιατί μπορεί να έχει ειδική μορφοποίηση
+
             const newDoc = {
                 id: Date.now(),
-                nomos: document.getElementById('nomos').value,
-                city: document.getElementById('city').value,
-                name: document.getElementById('name').value,
-                address: document.getElementById('address').value,
-                mobile: document.getElementById('mobile').value,
-                landline: document.getElementById('landline').value,
-                email: document.getElementById('email').value,
+                nomos: capitalizeWords(rawNomos.trim()),
+                city: capitalizeWords(rawCity.trim()),
+                name: capitalizeWords(rawName.trim()),
+                address: document.getElementById('address').value.trim(),
+                mobile: document.getElementById('mobile').value.trim(),
+                landline: document.getElementById('landline').value.trim(),
+                email: document.getElementById('email').value.trim(),
                 specialties: [specialty],
-                notes: document.getElementById('notes').value,
+                notes: document.getElementById('notes').value.trim(),
                 visits: []
             };
 
