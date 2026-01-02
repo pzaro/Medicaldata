@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>MediCloud Pro (Full Control)</title>
+    <title>MediCloud Pro (Vascular Update)</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
@@ -103,6 +103,7 @@
                             <label class="flex items-center p-2 bg-white border rounded hover:bg-gray-50 cursor-pointer"><input type="radio" name="specialty" value="Χειρουργός Ορθοπεδικός" class="mr-2 accent-teal-600"> Χειρ. Ορθοπεδικός</label>
                             <label class="flex items-center p-2 bg-white border rounded hover:bg-gray-50 cursor-pointer"><input type="radio" name="specialty" value="Ηπατολόγος" class="mr-2 accent-teal-600"> Ηπατολόγος</label>
                             <label class="flex items-center p-2 bg-white border rounded hover:bg-gray-50 cursor-pointer"><input type="radio" name="specialty" value="Γαστρεντερολόγος" class="mr-2 accent-teal-600"> Γαστρεντερολόγος</label>
+                            <label class="flex items-center p-2 bg-white border rounded hover:bg-gray-50 cursor-pointer"><input type="radio" name="specialty" value="Αγγειοχειρουργός - Αγγειολόγος" class="mr-2 accent-teal-600"> Αγγειοχειρουργός</label>
                             <label class="flex items-center p-2 bg-white border rounded hover:bg-gray-50 cursor-pointer"><input type="radio" name="specialty" value="Άλλο" class="mr-2 accent-teal-600" checked> Άλλο</label>
                         </div>
                     </div>
@@ -143,7 +144,6 @@
 
         // --- Google Logic ---
         function initMap() {
-            // Γέμισμα της λίστας Νομών
             const datalist = document.getElementById('greekNomoiList');
             greekNomoi.forEach(nomos => {
                 const option = document.createElement('option');
@@ -196,7 +196,6 @@
                     
                     if (types.includes('administrative_area_level_2')) {
                         let extractedNomos = component.long_name.replace('Περιφερειακή Ενότητα ', '').replace('Νομός ', '');
-                        // Προσπάθεια ταύτισης με τη λίστα μας
                         const match = greekNomoi.find(n => n.includes(extractedNomos) || extractedNomos.includes(n));
                         nomos = match || extractedNomos;
                     } else if (types.includes('administrative_area_level_1') && !nomos) {
@@ -204,7 +203,6 @@
                     }
                 }
             }
-            // Αν βρήκε κάτι το βάζει, αλλιώς αφήνει τον χρήστη να γράψει
             if(city) document.getElementById('city').value = city;
             if(nomos) document.getElementById('nomos').value = nomos;
         }
@@ -237,10 +235,14 @@
             else if (nameLower.includes('ορθοπεδικ') || nameLower.includes('ορθοπαιδικ')) foundSpec = 'Χειρουργός Ορθοπεδικός';
             else if (nameLower.includes('καρδιολόγ')) foundSpec = 'Καρδιολόγος';
             else if (nameLower.includes('γενικός') || nameLower.includes('οικογενειακ')) foundSpec = 'Γενικός Οικογενειακός Ιατρός';
-            else if (nameLower.includes('χειρουργ')) foundSpec = 'Γενικός Χειρουργός';
-            else if (nameLower.includes('ηπατολόγ')) foundSpec = 'Ηπατολόγος';
-            else if (nameLower.includes('γαστρεντερολόγ')) foundSpec = 'Γαστρεντερολόγος';
-            else if (nameLower.includes('παθολόγ')) foundSpec = 'Παθολόγος';
+            else if (nameLower.includes('χειρουργ') || nameLower.includes('surgeon')) foundSpec = 'Γενικός Χειρουργός';
+            else if (nameLower.includes('ηπατολόγ') || nameLower.includes('hepatolog')) foundSpec = 'Ηπατολόγος';
+            else if (nameLower.includes('γαστρεντερολόγ') || nameLower.includes('gastroenterolog')) foundSpec = 'Γαστρεντερολόγος';
+            else if (nameLower.includes('παθολόγ') || nameLower.includes('παθολογ')) foundSpec = 'Παθολόγος';
+            // NEW: Vascular Surgeon Detection
+            else if (nameLower.includes('αγγειο') || nameLower.includes('vascular') || nameLower.includes('angio')) {
+                foundSpec = 'Αγγειοχειρουργός - Αγγειολόγος';
+            }
 
             const radio = document.querySelector(`input[name="specialty"][value="${foundSpec}"]`);
             if(radio) radio.checked = true;
@@ -277,7 +279,7 @@
             });
         }
 
-        // --- ΦΙΛΤΡΑ ΛΟΓΙΚΗ ---
+        // --- FILTER & SYNC LOGIC ---
         function populateFilters() {
             const nomosSelect = document.getElementById('filterNomos');
             const citySelect = document.getElementById('filterCity');
@@ -338,7 +340,6 @@
             filterCities();
         }
 
-        // --- App Logic ---
         document.addEventListener('DOMContentLoaded', () => {
             const saved = localStorage.getItem('backupDoctors');
             if (saved) { doctors = JSON.parse(saved); renderList(); populateFilters(); }
