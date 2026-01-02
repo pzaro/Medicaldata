@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>MediCloud Pro AI</title>
+    <title>MediCloud Auto Pro</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
@@ -50,8 +50,14 @@
                     <input type="text" id="address" placeholder="Διεύθυνση" class="w-full p-3 border rounded-lg bg-gray-50 focus:bg-white focus:ring-2 focus:ring-teal-500 outline-none transition mb-3">
                     
                     <div class="grid grid-cols-2 gap-3 mb-3">
-                        <input type="tel" id="mobile" placeholder="Κινητό" class="w-full p-3 border rounded-lg bg-gray-50 focus:bg-white focus:ring-2 focus:ring-teal-500 outline-none">
-                        <input type="tel" id="landline" placeholder="Σταθερό" class="w-full p-3 border rounded-lg bg-gray-50 focus:bg-white focus:ring-2 focus:ring-teal-500 outline-none">
+                        <div>
+                            <label class="text-xs font-bold text-gray-500 ml-1">Κινητό</label>
+                            <input type="tel" id="mobile" placeholder="Κινητό" class="w-full p-3 border rounded-lg bg-gray-50 focus:bg-white focus:ring-2 focus:ring-teal-500 outline-none">
+                        </div>
+                        <div>
+                            <label class="text-xs font-bold text-gray-500 ml-1">Σταθερό</label>
+                            <input type="tel" id="landline" placeholder="Σταθερό" class="w-full p-3 border rounded-lg bg-gray-50 focus:bg-white focus:ring-2 focus:ring-teal-500 outline-none">
+                        </div>
                     </div>
                     
                     <input type="email" id="email" placeholder="Email (αν υπάρχει)" class="w-full p-3 border rounded-lg bg-gray-50 focus:bg-white focus:ring-2 focus:ring-teal-500 outline-none mb-3">
@@ -61,9 +67,9 @@
                         <div class="grid grid-cols-2 gap-2 text-sm mt-2">
                             <label class="flex items-center p-2 bg-white border rounded hover:bg-gray-50 cursor-pointer"><input type="radio" name="specialty" value="Παθολόγος" class="mr-2 accent-teal-600"> Παθολόγος</label>
                             <label class="flex items-center p-2 bg-white border rounded hover:bg-gray-50 cursor-pointer"><input type="radio" name="specialty" value="Καρδιολόγος" class="mr-2 accent-teal-600"> Καρδιολόγος</label>
-                            <label class="flex items-center p-2 bg-white border rounded hover:bg-gray-50 cursor-pointer"><input type="radio" name="specialty" value="Οδοντίατρος" class="mr-2 accent-teal-600"> Οδοντίατρος</label>
-                            <label class="flex items-center p-2 bg-white border rounded hover:bg-gray-50 cursor-pointer"><input type="radio" name="specialty" value="Οφθαλμίατρος" class="mr-2 accent-teal-600"> Οφθαλμίατρος</label>
-                            <label class="flex items-center p-2 bg-white border rounded hover:bg-gray-50 cursor-pointer"><input type="radio" name="specialty" value="Ορθοπεδικός" class="mr-2 accent-teal-600"> Ορθοπεδικός</label>
+                            <label class="flex items-center p-2 bg-white border rounded hover:bg-gray-50 cursor-pointer"><input type="radio" name="specialty" value="Γενικός Χειρουργός" class="mr-2 accent-teal-600"> Γεν. Χειρουργός</label>
+                            <label class="flex items-center p-2 bg-white border rounded hover:bg-gray-50 cursor-pointer"><input type="radio" name="specialty" value="Γενικός Οικογενειακός Ιατρός" class="mr-2 accent-teal-600"> Γεν. Οικ. Ιατρός</label>
+                            <label class="flex items-center p-2 bg-white border rounded hover:bg-gray-50 cursor-pointer"><input type="radio" name="specialty" value="Χειρουργός Ορθοπεδικός" class="mr-2 accent-teal-600"> Χειρ. Ορθοπεδικός</label>
                             <label class="flex items-center p-2 bg-white border rounded hover:bg-gray-50 cursor-pointer"><input type="radio" name="specialty" value="Δερματολόγος" class="mr-2 accent-teal-600"> Δερματολόγος</label>
                             <label class="flex items-center p-2 bg-white border rounded hover:bg-gray-50 cursor-pointer"><input type="radio" name="specialty" value="Άλλο" class="mr-2 accent-teal-600" checked> Άλλο</label>
                         </div>
@@ -91,7 +97,6 @@
         function initMap() {
             const input = document.getElementById("google-search");
             const options = {
-                // Ζητάμε και το πεδίο "types" τώρα
                 fields: ["formatted_address", "name", "formatted_phone_number", "website", "types"],
                 componentRestrictions: { country: "gr" }, 
                 types: ["establishment"], 
@@ -111,8 +116,11 @@
                     document.getElementById("address").value = place.formatted_address.replace(", Ελλάδα", "");
                 }
 
+                // 2. Έξυπνος Διαχωρισμός Τηλεφώνου
                 if (place.formatted_phone_number) {
-                    const phone = place.formatted_phone_number.replace(/\s/g, ''); 
+                    const phone = place.formatted_phone_number.replace(/\s/g, ''); // Αφαίρεση κενών
+                    
+                    // Αν ξεκινάει από 69 είναι κινητό, αλλιώς σταθερό
                     if (phone.startsWith('69')) {
                         document.getElementById("mobile").value = phone;
                         document.getElementById("landline").value = "";
@@ -126,7 +134,7 @@
                     document.getElementById("notes").value = "Website: " + place.website;
                 }
 
-                // 2. ΕΞΥΠΝΗ ΑΝΑΓΝΩΡΙΣΗ ΕΙΔΙΚΟΤΗΤΑΣ
+                // 3. ΑΥΤΟΜΑΤΗ ΑΝΑΓΝΩΡΙΣΗ ΕΙΔΙΚΟΤΗΤΑΣ
                 detectSpecialty(place);
             });
         }
@@ -138,23 +146,29 @@
 
             // Λογική: Ψάχνουμε λέξεις κλειδιά στο όνομα ή στον τύπο της Google
             
-            if (types.includes('dentist') || nameLower.includes('οδοντιατρ') || nameLower.includes('οδοντίατρ')) {
-                foundSpec = 'Οδοντίατρος';
-            } 
-            else if (nameLower.includes('καρδιολογ') || nameLower.includes('καρδιολόγ')) {
+            // 1. Χειρουργός Ορθοπεδικός
+            if (nameLower.includes('ορθοπεδικ') || nameLower.includes('ορθοπαιδικ') || nameLower.includes('orthoped')) {
+                foundSpec = 'Χειρουργός Ορθοπεδικός';
+            }
+            // 2. Καρδιολόγος
+            else if (nameLower.includes('καρδιολογ') || nameLower.includes('καρδιολόγ') || nameLower.includes('cardiolog')) {
                 foundSpec = 'Καρδιολόγος';
             }
-            else if (nameLower.includes('οφθαλμιατρ') || nameLower.includes('οφθαλμίατρ') || nameLower.includes('οφθαλμολογ')) {
-                foundSpec = 'Οφθαλμίατρος';
-            }
-            else if (nameLower.includes('ορθοπεδικ') || nameLower.includes('ορθοπαιδικ')) {
-                foundSpec = 'Ορθοπεδικός';
-            }
-            else if (nameLower.includes('παθολόγ') || nameLower.includes('παθολογ')) {
-                foundSpec = 'Παθολόγος';
-            }
+            // 3. Δερματολόγος
             else if (nameLower.includes('δερματολογ') || nameLower.includes('δερματολόγ')) {
                 foundSpec = 'Δερματολόγος';
+            }
+            // 4. Γενικός Οικογενειακός Ιατρός
+            else if (nameLower.includes('γενικός') || nameLower.includes('γενικος') || nameLower.includes('οικογενειακ') || nameLower.includes('family') || nameLower.includes('general pract')) {
+                foundSpec = 'Γενικός Οικογενειακός Ιατρός';
+            }
+            // 5. Γενικός Χειρουργός
+            else if (nameLower.includes('χειρουργ') || nameLower.includes('surgeon') || nameLower.includes('chirurg')) {
+                foundSpec = 'Γενικός Χειρουργός';
+            }
+            // 6. Παθολόγος
+            else if (nameLower.includes('παθολόγ') || nameLower.includes('παθολογ') || nameLower.includes('internist')) {
+                foundSpec = 'Παθολόγος';
             }
 
             // Επιλογή του Radio Button
