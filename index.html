@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>MediCloud Pro (Final)</title>
+    <title>MediCloud Pro (Connected)</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
@@ -156,8 +156,8 @@
     <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAr8wchlfC4YXxTHZq2wk82BtIN3xMyeLg&libraries=places&callback=initMap" async defer></script>
 
     <script>
-        // --- ΤΟ URL ΠΟΥ ΕΣΤΕΙΛΕΣ (ΠΛΗΡΕΣ) ---
-        const API_URL = "https://script.google.com/macros/s/AKfycbz3-6c0DqFdbWS0UZjRY6FvkEradN2h2gvbYoT6zD7QNR__DGjyFQlk2SV6i8tnyTty/exec";
+        // --- ΤΟ ΝΕΟ ΣΟΥ LINK ΣΩΣΤΑ ---
+        const API_URL = "https://script.google.com/macros/s/AKfycbzGVW4g9cQFJ9Row8Uw9Z9fobFbZScIT5tNFzxAyLg1161R8fbICME-ATE-0uUr41_w/exec";
         
         let doctors = [];
         let placesService;
@@ -190,7 +190,7 @@
                 }
             } catch (error) {
                 console.error(error);
-                alert("Σφάλμα σύνδεσης με τις επαφές.");
+                alert("Σφάλμα σύνδεσης. Ελέγξτε αν επιλέξατε 'Anyone' στο Deploy.");
             } finally {
                 btn.innerHTML = originalIcon;
                 btn.disabled = false;
