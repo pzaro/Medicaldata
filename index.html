@@ -3,10 +3,18 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>MediCloud (Manual Pro)</title>
+    <title>MediCloud Auto Pro</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <style>body { font-family: system-ui, -apple-system, sans-serif; background-color: #f0fdfa; }</style>
+    <style>
+        body { font-family: system-ui, -apple-system, sans-serif; background-color: #f0fdfa; }
+        /* Στυλ για τη λίστα της Google */
+        .pac-container { border-radius: 10px; margin-top: 5px; box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1); border: 1px solid #e5e7eb; font-family: system-ui; z-index: 1000; }
+        .pac-item { padding: 12px; font-size: 14px; cursor: pointer; border-bottom: 1px solid #f3f4f6; }
+        .pac-item:hover { background-color: #f0fdfa; }
+        .pac-item-query { font-size: 15px; font-weight: bold; color: #0f766e; }
+        .pac-icon { display: none; } /* Κρύβουμε το εικονίδιο της Google για πιο καθαρό look */
+    </style>
 </head>
 <body class="pb-24">
 
@@ -27,26 +35,21 @@
     <main class="container mx-auto p-4 max-w-2xl">
         
         <div id="doctorForm" class="hidden bg-white p-6 rounded-2xl shadow-xl mb-6 border-t-4 border-teal-500 slide-in">
-            <h2 class="text-lg font-bold mb-4 text-gray-700">Νέα Καταχώρηση</h2>
+            <h2 class="text-lg font-bold mb-4 text-gray-700">Αυτόματη Καταχώρηση</h2>
             <form onsubmit="saveDoctor(event)" class="space-y-4">
                 
-                <div class="bg-blue-50 p-4 rounded-xl border border-blue-100 mb-4">
-                    <label class="text-xs font-bold text-blue-800 uppercase mb-2 block">🔍 Βοηθεια Αναζητησης</label>
-                    <div class="flex gap-2">
-                        <input type="text" id="tempSearch" placeholder="π.χ. Παπαδόπουλος Καρδιολόγος Περιστέρι" class="w-full p-2 border rounded text-sm focus:outline-none focus:border-blue-500">
-                        <button type="button" onclick="manualSearch()" class="bg-blue-600 text-white px-4 rounded shadow hover:bg-blue-700 font-bold">
-                            Ψάξε
-                        </button>
-                    </div>
-                    <p class="text-xs text-blue-500 mt-2">* Πατήστε "Ψάξε" για να βρείτε τα στοιχεία στο Google και να τα αντιγράψετε παρακάτω.</p>
+                <div class="relative bg-blue-50 p-4 rounded-xl border border-blue-100 shadow-inner">
+                    <label class="text-xs font-bold text-blue-800 uppercase mb-2 block"><i class="fa-solid fa-magnifying-glass"></i> Αναζητηση Ιατρου</label>
+                    <input type="text" id="google-search" placeholder="Γράψε όνομα (π.χ. Παπαδόπουλος Καρδιολόγος)" class="w-full p-3 border-2 border-blue-200 rounded-lg focus:border-blue-500 outline-none shadow-sm bg-white">
+                    <p class="text-xs text-blue-500 mt-2"><i class="fa-solid fa-arrow-up"></i> Επίλεξε από τη λίστα που θα εμφανιστεί.</p>
                 </div>
 
                 <div class="pt-2 border-t border-gray-100">
-                    <label class="text-xs font-bold text-gray-500 ml-1">Ονοματεπώνυμο</label>
-                    <input type="text" id="name" required class="w-full p-3 border rounded-lg bg-gray-50 focus:bg-white focus:ring-2 focus:ring-teal-500 outline-none transition mb-3 font-bold text-gray-800">
+                    <p class="text-xs font-bold text-gray-400 uppercase mb-2">Στοιχεια</p>
                     
-                    <label class="text-xs font-bold text-gray-500 ml-1">Διεύθυνση</label>
-                    <input type="text" id="address" class="w-full p-3 border rounded-lg bg-gray-50 focus:bg-white focus:ring-2 focus:ring-teal-500 outline-none transition mb-3">
+                    <input type="text" id="name" placeholder="Ονοματεπώνυμο" required class="w-full p-3 border rounded-lg bg-gray-50 focus:bg-white focus:ring-2 focus:ring-teal-500 outline-none transition mb-3 font-bold text-gray-800">
+                    
+                    <input type="text" id="address" placeholder="Διεύθυνση" class="w-full p-3 border rounded-lg bg-gray-50 focus:bg-white focus:ring-2 focus:ring-teal-500 outline-none transition mb-3">
                     
                     <div class="grid grid-cols-2 gap-3 mb-3">
                         <div>
@@ -59,11 +62,10 @@
                         </div>
                     </div>
                     
-                    <label class="text-xs font-bold text-gray-500 ml-1">Email</label>
-                    <input type="email" id="email" class="w-full p-3 border rounded-lg bg-gray-50 focus:bg-white focus:ring-2 focus:ring-teal-500 outline-none mb-3">
+                    <input type="email" id="email" placeholder="Email" class="w-full p-3 border rounded-lg bg-gray-50 focus:bg-white focus:ring-2 focus:ring-teal-500 outline-none mb-3">
                     
                     <div class="mb-3 bg-gray-50 p-3 rounded-lg border border-gray-100">
-                        <label class="text-xs font-bold text-gray-500 ml-1">Ειδικότητα:</label>
+                        <label class="text-xs font-bold text-gray-500 ml-1">Ειδικότητα (Αυτόματη Επιλογή):</label>
                         <div class="grid grid-cols-2 gap-2 text-sm mt-2">
                             <label class="flex items-center p-2 bg-white border rounded hover:bg-gray-50 cursor-pointer"><input type="radio" name="specialty" value="Παθολόγος" class="mr-2 accent-teal-600"> Παθολόγος</label>
                             <label class="flex items-center p-2 bg-white border rounded hover:bg-gray-50 cursor-pointer"><input type="radio" name="specialty" value="Καρδιολόγος" class="mr-2 accent-teal-600"> Καρδιολόγος</label>
@@ -75,16 +77,17 @@
                         </div>
                     </div>
 
-                    <label class="text-xs font-bold text-gray-500 ml-1">Σημειώσεις</label>
-                    <textarea id="notes" class="w-full p-3 border rounded-lg h-20 bg-gray-50 focus:bg-white focus:ring-2 focus:ring-teal-500 outline-none"></textarea>
+                    <textarea id="notes" placeholder="Σημειώσεις / Website..." class="w-full p-3 border rounded-lg h-20 bg-gray-50 focus:bg-white focus:ring-2 focus:ring-teal-500 outline-none"></textarea>
                 </div>
                 
-                <button type="submit" class="w-full bg-teal-600 text-white py-3 rounded-xl font-bold shadow-lg hover:bg-teal-700 transition transform active:scale-95">Αποθήκευση</button>
+                <button type="submit" class="w-full bg-teal-600 text-white py-3 rounded-xl font-bold shadow-lg hover:bg-teal-700 transition transform active:scale-95">Αποθήκευση Ιατρού</button>
             </form>
         </div>
 
         <div id="doctorsList" class="space-y-4"></div>
     </main>
+
+    <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAr8wchlfC4YXxTHZq2wk82BtIN3xMyeLg&libraries=places&callback=initMap" async defer></script>
 
     <script>
         // URL Google Script
@@ -92,17 +95,86 @@
         
         let doctors = [];
 
-        // --- Χειροκίνητη Αναζήτηση ---
-        function manualSearch() {
-            const query = document.getElementById('tempSearch').value;
-            if(!query) return alert('Γράψε κάτι στην αναζήτηση!');
-            
-            // Ανοίγει νέο παράθυρο στο Google Maps
-            const url = `https://www.google.com/search?q=Ιατρείο ${encodeURIComponent(query)} τηλέφωνο διεύθυνση`;
-            window.open(url, '_blank');
+        // --- Google Autocomplete Logic ---
+        function initMap() {
+            const input = document.getElementById("google-search");
+            // Ρυθμίσεις: Ψάχνουμε ΜΟΝΟ επιχειρήσεις στην Ελλάδα
+            const options = {
+                fields: ["formatted_address", "name", "formatted_phone_number", "website"],
+                componentRestrictions: { country: "gr" }, 
+                types: ["establishment", "health"], 
+            };
+
+            const autocomplete = new google.maps.places.Autocomplete(input, options);
+
+            // Τι συμβαίνει όταν επιλέγεις από τη λίστα
+            autocomplete.addListener("place_changed", () => {
+                const place = autocomplete.getPlace();
+
+                if (!place.name) return;
+
+                // 1. Συμπλήρωση Ονόματος
+                document.getElementById("name").value = place.name;
+                
+                // 2. Συμπλήρωση Διεύθυνσης
+                if (place.formatted_address) {
+                    // Αφαιρούμε το ", Ελλάδα" για να είναι πιο καθαρό
+                    document.getElementById("address").value = place.formatted_address.replace(", Ελλάδα", "");
+                }
+
+                // 3. Έξυπνος Διαχωρισμός Τηλεφώνου (Κινητό vs Σταθερό)
+                if (place.formatted_phone_number) {
+                    const phone = place.formatted_phone_number.replace(/\s/g, ''); // Βγάζουμε τα κενά
+                    
+                    if (phone.startsWith('69')) {
+                        document.getElementById("mobile").value = phone;
+                        document.getElementById("landline").value = "";
+                    } else {
+                        document.getElementById("landline").value = phone;
+                        document.getElementById("mobile").value = "";
+                    }
+                }
+
+                // 4. Website
+                if (place.website) {
+                    document.getElementById("notes").value = "Website: " + place.website;
+                }
+
+                // 5. Αυτόματη Αναγνώριση Ειδικότητας
+                detectSpecialty(place.name);
+            });
         }
 
-        // --- Βασική Λογική Εφαρμογής ---
+        function detectSpecialty(name) {
+            const lowerName = name.toLowerCase();
+            let foundSpec = 'Άλλο';
+
+            // Λεξικό Ειδικοτήτων
+            if (lowerName.includes('παθολόγ') || lowerName.includes('patholog') || lowerName.includes('internist')) {
+                foundSpec = 'Παθολόγος';
+            } 
+            else if (lowerName.includes('καρδιολόγ') || lowerName.includes('cardiolog')) {
+                foundSpec = 'Καρδιολόγος';
+            }
+            else if (lowerName.includes('γενικός') || lowerName.includes('γενικος') || lowerName.includes('general pract')) {
+                foundSpec = 'Γενικός Ιατρός';
+            }
+            else if (lowerName.includes('χειρουργ') || lowerName.includes('surgeon')) {
+                foundSpec = 'Χειρουργός';
+            }
+            else if (lowerName.includes('ηπατολόγ') || lowerName.includes('hepatolog')) {
+                foundSpec = 'Ηπατολόγος';
+            }
+            else if (lowerName.includes('γαστρεντερολόγ') || lowerName.includes('gastroenterolog')) {
+                foundSpec = 'Γαστρεντερολόγος';
+            }
+
+            // Επιλογή στο Radio Button
+            const radio = document.querySelector(`input[name="specialty"][value="${foundSpec}"]`);
+            if(radio) radio.checked = true;
+        }
+
+        // --- Standard App Logic ---
         document.addEventListener('DOMContentLoaded', () => {
             const saved = localStorage.getItem('backupDoctors');
             if (saved) { doctors = JSON.parse(saved); renderList(); }
@@ -147,6 +219,11 @@
         function toggleForm() { 
             const form = document.getElementById('doctorForm');
             form.classList.toggle('hidden');
+            if(!form.classList.contains('hidden')) {
+                // Καθαρισμός και Focus όταν ανοίγει
+                document.getElementById('google-search').value = '';
+                document.getElementById('google-search').focus();
+            }
         }
 
         function saveDoctor(e) {
@@ -171,7 +248,6 @@
             renderList();
             toggleForm();
             document.querySelector('form').reset();
-            document.getElementById('tempSearch').value = ''; // Καθαρισμός αναζήτησης
             saveToCloud();
         }
 
