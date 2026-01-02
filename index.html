@@ -3,12 +3,11 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Medical App (Safe Mode)</title>
+    <title>Smart Medical App</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         body { font-family: system-ui, -apple-system, sans-serif; background-color: #f0fdfa; }
-        /* Αφαιρούμε τελείως το CSS του Loader για να μην μπλοκάρει τίποτα */
     </style>
 </head>
 <body class="pb-24">
@@ -30,101 +29,121 @@
     <main class="container mx-auto p-4 max-w-2xl">
         
         <div id="doctorForm" class="hidden bg-white p-6 rounded-xl shadow-lg mb-6 border-t-4 border-teal-500">
-            <h2 class="text-lg font-bold mb-4">Νέα Καταχώρηση</h2>
+            <h2 class="text-lg font-bold mb-4 text-gray-700">Νέα Καταχώρηση</h2>
             <form onsubmit="saveDoctor(event)" class="space-y-4">
-                <input type="text" id="name" placeholder="Ονοματεπώνυμο" required class="w-full p-3 border rounded bg-gray-50">
-                <input type="text" id="address" placeholder="Διεύθυνση" class="w-full p-3 border rounded bg-gray-50">
-                <div class="grid grid-cols-2 gap-3">
-                    <input type="tel" id="mobile" placeholder="Κινητό" class="w-full p-3 border rounded bg-gray-50">
-                    <input type="tel" id="landline" placeholder="Σταθερό" class="w-full p-3 border rounded bg-gray-50">
-                </div>
-                <input type="email" id="email" placeholder="Email" class="w-full p-3 border rounded bg-gray-50">
                 
-                <div class="mt-2">
-                    <label class="font-bold text-gray-600 text-sm">Ειδικότητα:</label>
-                    <div class="grid grid-cols-2 gap-2 text-sm mt-1">
-                        <label class="flex items-center p-2 border rounded"><input type="checkbox" name="specialty" value="Παθολόγος" class="mr-2"> Παθολόγος</label>
-                        <label class="flex items-center p-2 border rounded"><input type="checkbox" name="specialty" value="Καρδιολόγος" class="mr-2"> Καρδιολόγος</label>
-                        <label class="flex items-center p-2 border rounded"><input type="checkbox" name="specialty" value="Οδοντίατρος" class="mr-2"> Οδοντίατρος</label>
-                        <label class="flex items-center p-2 border rounded"><input type="checkbox" name="specialty" value="Οφθαλμίατρος" class="mr-2"> Οφθαλμίατρος</label>
-                        <label class="flex items-center p-2 border rounded"><input type="checkbox" name="specialty" value="Ορθοπεδικός" class="mr-2"> Ορθοπεδικός</label>
-                        <label class="flex items-center p-2 border rounded"><input type="checkbox" name="specialty" value="Δερματολόγος" class="mr-2"> Δερματολόγος</label>
+                <div class="bg-blue-50 p-3 rounded-lg border border-blue-100 space-y-3">
+                    <p class="text-xs font-bold text-blue-800 uppercase mb-1">Βημα 1: Αναζητηση Στοιχειων</p>
+                    
+                    <div>
+                        <input type="text" id="name" placeholder="Ονοματεπώνυμο Ιατρού" required class="w-full p-2 border rounded focus:ring-2 focus:ring-blue-400 outline-none">
+                    </div>
+
+                    <div class="flex gap-2">
+                        <input type="text" id="city" placeholder="Πόλη (π.χ. Αθήνα)" class="flex-1 p-2 border rounded focus:ring-2 focus:ring-blue-400 outline-none">
+                        <button type="button" onclick="smartSearch()" class="bg-blue-600 text-white px-4 rounded shadow hover:bg-blue-700 font-bold flex items-center gap-2">
+                            <i class="fa-brands fa-google"></i> Ψάξε
+                        </button>
+                    </div>
+
+                    <div>
+                        <label class="text-xs font-bold text-gray-500 ml-1">Ειδικότητα:</label>
+                        <div class="grid grid-cols-2 gap-2 text-sm mt-1">
+                            <label class="flex items-center p-2 bg-white border rounded cursor-pointer"><input type="radio" name="specialty" value="Παθολόγος" class="mr-2 accent-teal-600"> Παθολόγος</label>
+                            <label class="flex items-center p-2 bg-white border rounded cursor-pointer"><input type="radio" name="specialty" value="Καρδιολόγος" class="mr-2 accent-teal-600"> Καρδιολόγος</label>
+                            <label class="flex items-center p-2 bg-white border rounded cursor-pointer"><input type="radio" name="specialty" value="Οδοντίατρος" class="mr-2 accent-teal-600"> Οδοντίατρος</label>
+                            <label class="flex items-center p-2 bg-white border rounded cursor-pointer"><input type="radio" name="specialty" value="Οφθαλμίατρος" class="mr-2 accent-teal-600"> Οφθαλμίατρος</label>
+                            <label class="flex items-center p-2 bg-white border rounded cursor-pointer"><input type="radio" name="specialty" value="Ορθοπεδικός" class="mr-2 accent-teal-600"> Ορθοπεδικός</label>
+                            <label class="flex items-center p-2 bg-white border rounded cursor-pointer"><input type="radio" name="specialty" value="Άλλο" class="mr-2 accent-teal-600" checked> Άλλο</label>
+                        </div>
                     </div>
                 </div>
-                <textarea id="notes" placeholder="Σημειώσεις..." class="w-full p-3 border rounded h-24 bg-gray-50"></textarea>
-                <button type="submit" class="w-full bg-teal-600 text-white py-3 rounded font-bold shadow">Αποθήκευση</button>
+
+                <div class="space-y-3 pt-2">
+                    <p class="text-xs font-bold text-gray-400 uppercase">Βημα 2: Συμπληρωση (Copy-Paste)</p>
+                    <input type="text" id="address" placeholder="Οδός & Αριθμός" class="w-full p-3 border rounded bg-gray-50">
+                    
+                    <div class="grid grid-cols-2 gap-3">
+                        <input type="tel" id="mobile" placeholder="Κινητό" class="w-full p-3 border rounded bg-gray-50">
+                        <input type="tel" id="landline" placeholder="Σταθερό" class="w-full p-3 border rounded bg-gray-50">
+                    </div>
+                    
+                    <input type="email" id="email" placeholder="Email" class="w-full p-3 border rounded bg-gray-50">
+                    <textarea id="notes" placeholder="Σημειώσεις..." class="w-full p-3 border rounded h-20 bg-gray-50"></textarea>
+                </div>
+                
+                <button type="submit" class="w-full bg-teal-600 text-white py-3 rounded-lg font-bold shadow-lg hover:bg-teal-700 transition transform active:scale-95">Αποθήκευση</button>
             </form>
         </div>
 
         <div id="doctorsList" class="space-y-4">
             <div class="text-center text-gray-400 mt-10">
-                <p>Φόρτωση...</p>
+                <i class="fa-solid fa-cloud text-3xl mb-2"></i>
+                <p>Σύνδεση...</p>
             </div>
         </div>
 
     </main>
 
     <script>
-        // ΤΟ URL ΣΟΥ
+        // --- ΡΥΘΜΙΣΕΙΣ URL ---
         const API_URL = "https://script.google.com/macros/s/AKfycbxxRSXP6miPqmMFaTDtBAtRKmgJwwvdxHzYRo9PExwmbxY8k14l_b3HXpMi4Y3UFS5W/exec";
 
         let doctors = [];
 
-        // 1. Ξεκινάμε ΑΜΕΣΩΣ
         document.addEventListener('DOMContentLoaded', () => {
-            // Πρώτα εμφανίζουμε ό,τι έχουμε τοπικά (αν υπάρχει)
             const saved = localStorage.getItem('backupDoctors');
-            if (saved) {
-                doctors = JSON.parse(saved);
-                renderList();
-            } else {
-                renderList(); // Εμφανίζει κενή λίστα
-            }
-            
-            // Μετά προσπαθούμε να πάρουμε από Google
+            if (saved) { doctors = JSON.parse(saved); renderList(); }
             syncData();
         });
+
+        // --- SMART SEARCH FUNCTION ---
+        function smartSearch() {
+            const name = document.getElementById('name').value;
+            const city = document.getElementById('city').value;
+            
+            // Βρες ποια ειδικότητα είναι επιλεγμένη
+            const specElement = document.querySelector('input[name="specialty"]:checked');
+            const specialty = specElement ? specElement.value : '';
+            
+            if (!name) {
+                alert("Παρακαλώ συμπληρώστε το όνομα πρώτα.");
+                return;
+            }
+
+            // Δημιουργία αναζήτησης Google: "Ιατρείο [Όνομα] [Ειδικότητα] [Πόλη] τηλέφωνο"
+            const query = `Ιατρείο ${name} ${specialty !== 'Άλλο' ? specialty : ''} ${city} τηλέφωνο διεύθυνση`;
+            const url = `https://www.google.com/search?q=${encodeURIComponent(query)}`;
+            
+            window.open(url, '_blank');
+        }
 
         async function syncData() {
             const btn = document.getElementById('syncBtn');
             const status = document.getElementById('statusMsg');
-            
-            // Ένδειξη φόρτωσης στο κουμπί
             btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i>';
             status.classList.add('hidden');
 
             try {
                 const response = await fetch(API_URL);
-                
-                if (!response.ok) throw new Error("Server Error: " + response.status);
-
                 const data = await response.json();
 
                 if (Array.isArray(data)) {
                     doctors = data.sort((a, b) => b.id - a.id);
-                    localStorage.setItem('backupDoctors', JSON.stringify(doctors)); // Αποθήκευση αντιγράφου
+                    localStorage.setItem('backupDoctors', JSON.stringify(doctors));
                     renderList();
                     btn.innerHTML = '<i class="fa-solid fa-check text-green-300"></i>';
                     setTimeout(() => btn.innerHTML = '<i class="fa-solid fa-rotate"></i>', 2000);
-                } else {
-                    throw new Error("Έλαβα λάθος μορφή δεδομένων");
                 }
-
             } catch (error) {
                 console.error(error);
                 btn.innerHTML = '<i class="fa-solid fa-exclamation text-red-300"></i>';
-                
                 status.classList.remove('hidden');
-                status.innerHTML = `
-                    <b>⚠️ Πρόβλημα Σύνδεσης:</b> Δεν καταφέραμε να κατεβάσουμε τα δεδομένα από το Google Sheet.<br>
-                    <span class="text-xs mt-1 block">Μπορείτε να συνεχίσετε να χρησιμοποιείτε την εφαρμογή. Η αποθήκευση θα ξαναδοκιμαστεί στην επόμενη κίνηση.</span>
-                    <br><span class="text-xs text-gray-500">Λεπτομέρειες: ${error.message}</span>
-                `;
+                status.innerHTML = `<b>Offline Mode:</b> Δεν υπάρχει σύνδεση με το Google Sheet.`;
             }
         }
 
         async function saveToCloud() {
-            // Αποθήκευση στο παρασκήνιο (Fire and forget)
             try {
                 await fetch(API_URL, {
                     method: 'POST',
@@ -132,72 +151,76 @@
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ doctors: doctors })
                 });
-            } catch (e) {
-                console.log("Save failed silently:", e);
-            }
+            } catch (e) { console.log("Save failed silently:", e); }
         }
 
-        // --- UI LOGIC ---
-
-        function toggleForm() {
-            document.getElementById('doctorForm').classList.toggle('hidden');
-        }
+        function toggleForm() { document.getElementById('doctorForm').classList.toggle('hidden'); }
 
         function saveDoctor(e) {
             e.preventDefault();
-            const specs = Array.from(document.querySelectorAll('input[name="specialty"]:checked')).map(cb => cb.value);
+            const specElement = document.querySelector('input[name="specialty"]:checked');
+            const specialty = specElement ? specElement.value : 'Άλλο';
             
+            // Συνδυασμός Διεύθυνσης και Πόλης για αποθήκευση
+            const cityVal = document.getElementById('city').value;
+            const addressVal = document.getElementById('address').value;
+            // Αν ο χρήστης έγραψε πόλη, την κολλάμε δίπλα στη διεύθυνση (π.χ. "Εγνατίας 5, Θεσσαλονίκη")
+            const fullAddress = cityVal ? `${addressVal}, ${cityVal}` : addressVal;
+
             const newDoc = {
                 id: Date.now(),
                 name: document.getElementById('name').value,
-                address: document.getElementById('address').value,
+                address: fullAddress, // Αποθηκεύουμε την πλήρη διεύθυνση
                 mobile: document.getElementById('mobile').value,
                 landline: document.getElementById('landline').value,
                 email: document.getElementById('email').value,
-                specialties: specs,
+                specialties: [specialty],
                 notes: document.getElementById('notes').value,
                 visits: []
             };
 
             doctors.unshift(newDoc);
-            localStorage.setItem('backupDoctors', JSON.stringify(doctors)); // Τοπικό backup
-            
+            localStorage.setItem('backupDoctors', JSON.stringify(doctors));
             renderList();
             toggleForm();
             document.querySelector('form').reset();
-            
-            saveToCloud(); // Προσπάθεια αποστολής
+            saveToCloud();
         }
 
         function renderList() {
             const list = document.getElementById('doctorsList');
             list.innerHTML = '';
-
-            if (doctors.length === 0) {
-                list.innerHTML = `<div class="text-center text-gray-400 mt-10">Η λίστα είναι κενή.<br>Πατήστε "Νέος" για αρχή.</div>`;
-                return;
-            }
+            if (doctors.length === 0) { list.innerHTML = `<div class="text-center text-gray-400 mt-10">Η λίστα είναι κενή.</div>`; return; }
 
             doctors.forEach(doc => {
                 const mapLink = doc.address ? `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(doc.address)}` : '#';
-                
+                const specDisplay = doc.specialties.join(', ');
+
                 list.innerHTML += `
-                    <div class="bg-white rounded shadow p-4 relative border border-gray-100">
-                        <h3 class="font-bold text-lg">${doc.name}</h3>
-                        <div class="text-xs text-teal-600 font-bold mb-2">${doc.specialties.join(', ')}</div>
-                        
-                        <div class="flex gap-2 mb-2">
-                            ${doc.mobile ? `<a href="tel:${doc.mobile}" class="flex-1 bg-green-50 text-green-800 py-2 rounded text-center text-sm border">Κλήση</a>` : ''}
-                            ${doc.address ? `<a href="${mapLink}" target="_blank" class="flex-1 bg-blue-50 text-blue-800 py-2 rounded text-center text-sm border">Χάρτης</a>` : ''}
+                    <div class="bg-white rounded-xl shadow p-4 border border-gray-100 mb-4">
+                        <div class="flex justify-between items-start">
+                            <div>
+                                <h3 class="font-bold text-lg text-gray-800">${doc.name}</h3>
+                                <span class="bg-teal-50 text-teal-700 text-xs px-2 py-1 rounded border border-teal-100 font-bold">${specDisplay}</span>
+                            </div>
+                            <button onclick="if(confirm('Διαγραφή;')) { doctors = doctors.filter(d => d.id != ${doc.id}); renderList(); saveToCloud(); }" class="text-gray-300 hover:text-red-500"><i class="fa-solid fa-trash"></i></button>
                         </div>
 
-                        ${doc.notes ? `<div class="bg-gray-50 p-2 text-sm italic rounded mb-2">${doc.notes}</div>` : ''}
+                        <div class="flex gap-2 my-3">
+                            ${doc.mobile ? `<a href="tel:${doc.mobile}" class="flex-1 bg-green-50 text-green-700 py-2 rounded text-center text-sm font-bold border border-green-200"><i class="fa-solid fa-phone"></i> Κλήση</a>` : ''}
+                            ${doc.address ? `<a href="${mapLink}" target="_blank" class="flex-1 bg-blue-50 text-blue-700 py-2 rounded text-center text-sm font-bold border border-blue-200"><i class="fa-solid fa-location-arrow"></i> GPS</a>` : ''}
+                        </div>
                         
-                        <div class="border-t pt-2 mt-2">
-                            <input type="text" placeholder="Προσθήκη επίσκεψης (Enter)..." class="w-full text-sm p-2 border rounded" 
+                        ${doc.landline ? `<div class="text-xs text-gray-500 mb-1"><i class="fa-solid fa-phone-flip w-4"></i> ${doc.landline}</div>` : ''}
+                        ${doc.address ? `<div class="text-xs text-gray-500 mb-2"><i class="fa-solid fa-map-pin w-4"></i> ${doc.address}</div>` : ''}
+                        
+                        ${doc.notes ? `<div class="bg-yellow-50 p-2 text-sm italic text-gray-600 rounded mb-2 border-l-2 border-yellow-300">${doc.notes}</div>` : ''}
+                        
+                        <div class="border-t pt-2 bg-gray-50 -mx-4 px-4 pb-2 rounded-b-xl">
+                            <input type="text" placeholder="Προσθήκη επίσκεψης..." class="w-full text-sm p-2 border rounded bg-white shadow-sm" 
                             onkeydown="if(event.key==='Enter'){addVisit(${doc.id}, this.value); this.value='';}">
-                            <ul class="text-xs text-gray-500 mt-2 space-y-1">
-                                ${(doc.visits || []).map(v => `<li><b>${v.date}:</b> ${v.text}</li>`).join('')}
+                            <ul class="text-xs text-gray-500 mt-2 space-y-1 pl-1">
+                                ${(doc.visits || []).map(v => `<li><span class="font-bold text-teal-600">${v.date}:</span> ${v.text}</li>`).join('')}
                             </ul>
                         </div>
                     </div>
