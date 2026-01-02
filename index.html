@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>MediCloud Pro (Smart Format)</title>
+    <title>MediCloud Pro (Fix Vascular)</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
@@ -103,7 +103,7 @@
                             <label class="flex items-center p-2 bg-white border rounded hover:bg-gray-50 cursor-pointer"><input type="radio" name="specialty" value="Χειρουργός Ορθοπεδικός" class="mr-2 accent-teal-600"> Χειρ. Ορθοπεδικός</label>
                             <label class="flex items-center p-2 bg-white border rounded hover:bg-gray-50 cursor-pointer"><input type="radio" name="specialty" value="Ηπατολόγος" class="mr-2 accent-teal-600"> Ηπατολόγος</label>
                             <label class="flex items-center p-2 bg-white border rounded hover:bg-gray-50 cursor-pointer"><input type="radio" name="specialty" value="Γαστρεντερολόγος" class="mr-2 accent-teal-600"> Γαστρεντερολόγος</label>
-                            <label class="flex items-center p-2 bg-white border rounded hover:bg-gray-50 cursor-pointer"><input type="radio" name="specialty" value="Αγγειοχειρουργός - Αγγειολόγος" class="mr-2 accent-teal-600"> Αγγειοχειρουργός</label>
+                            <label class="flex items-center p-2 bg-white border rounded hover:bg-gray-50 cursor-pointer"><input type="radio" name="specialty" value="Αγγειοχειρουργός - Αγγειολόγος" class="mr-2 accent-teal-600"> Αγγειοχειρουργός - Αγγειολόγος</label>
                             <label class="flex items-center p-2 bg-white border rounded hover:bg-gray-50 cursor-pointer"><input type="radio" name="specialty" value="Άλλο" class="mr-2 accent-teal-600" checked> Άλλο</label>
                         </div>
                     </div>
@@ -249,17 +249,37 @@
             const types = place.types || [];
             let foundSpec = 'Άλλο';
 
-            if (types.includes('dentist') || nameNorm.includes('οδοντιατρ')) foundSpec = 'Γενικός Χειρουργός';
-            else if (nameNorm.includes('οφθαλμιατρ') || nameNorm.includes('οφθαλμολογ')) foundSpec = 'Γενικός Οικογενειακός Ιατρός';
-            else if (nameNorm.includes('ορθοπεδικ') || nameNorm.includes('ορθοπαιδικ')) foundSpec = 'Χειρουργός Ορθοπεδικός';
-            else if (nameNorm.includes('καρδιολογ')) foundSpec = 'Καρδιολόγος';
-            else if (nameNorm.includes('γενικος') || nameNorm.includes('οικογενειακ')) foundSpec = 'Γενικός Οικογενειακός Ιατρός';
-            else if (nameNorm.includes('χειρουργ')) foundSpec = 'Γενικός Χειρουργός';
-            else if (nameNorm.includes('ηπατολογ')) foundSpec = 'Ηπατολόγος';
-            else if (nameNorm.includes('γαστρεντερολογ')) foundSpec = 'Γαστρεντερολόγος';
-            else if (nameNorm.includes('παθολόγ') || nameNorm.includes('παθολογ')) foundSpec = 'Παθολόγος';
-            else if (nameNorm.includes('αγγειο') || nameNorm.includes('vascular') || nameNorm.includes('angio')) {
+            // ΠΡΟΣΟΧΗ: Η σειρά έχει σημασία. Ειδικοί χειρουργοί ΠΡΙΝ από το γενικό "χειρουργός"
+            
+            if (nameNorm.includes('αγγειο') || nameNorm.includes('vascular') || nameNorm.includes('angio')) {
                 foundSpec = 'Αγγειοχειρουργός - Αγγειολόγος';
+            }
+            else if (types.includes('dentist') || nameNorm.includes('οδοντιατρ')) {
+                foundSpec = 'Γενικός Χειρουργός';
+            }
+            else if (nameNorm.includes('ορθοπεδικ') || nameNorm.includes('ορθοπαιδικ')) {
+                foundSpec = 'Χειρουργός Ορθοπεδικός';
+            }
+            else if (nameNorm.includes('χειρουργ') || nameNorm.includes('surgeon')) {
+                foundSpec = 'Γενικός Χειρουργός';
+            }
+            else if (nameNorm.includes('οφθαλμιατρ') || nameNorm.includes('οφθαλμολογ')) {
+                foundSpec = 'Γενικός Οικογενειακός Ιατρός';
+            }
+            else if (nameNorm.includes('καρδιολογ')) {
+                foundSpec = 'Καρδιολόγος';
+            }
+            else if (nameNorm.includes('γενικος') || nameNorm.includes('οικογενειακ')) {
+                foundSpec = 'Γενικός Οικογενειακός Ιατρός';
+            }
+            else if (nameNorm.includes('ηπατολογ')) {
+                foundSpec = 'Ηπατολόγος';
+            }
+            else if (nameNorm.includes('γαστρεντερολογ')) {
+                foundSpec = 'Γαστρεντερολόγος';
+            }
+            else if (nameNorm.includes('παθολόγ') || nameNorm.includes('παθολογ')) {
+                foundSpec = 'Παθολόγος';
             }
 
             const radio = document.querySelector(`input[name="specialty"][value="${foundSpec}"]`);
@@ -414,12 +434,9 @@
             const specElement = document.querySelector('input[name="specialty"]:checked');
             const specialty = specElement ? specElement.value : 'Άλλο';
 
-            // AUTO-CAPITALIZE INPUTS (Για ομοιομορφία στη λίστα)
-            // Παίρνουμε την τιμή και την κάνουμε "Capitalize Words"
             const rawNomos = document.getElementById('nomos').value;
             const rawCity = document.getElementById('city').value;
             const rawName = document.getElementById('name').value;
-            // Δεν πειράζουμε τη διεύθυνση γιατί μπορεί να έχει ειδική μορφοποίηση
 
             const newDoc = {
                 id: Date.now(),
