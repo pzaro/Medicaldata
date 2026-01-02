@@ -157,7 +157,7 @@
 
     <script>
         // --- ΤΟ URL ΠΟΥ ΕΣΤΕΙΛΕΣ (ΣΩΣΤΑ ΣΥΜΠΛΗΡΩΜΕΝΟ) ---
-        const API_URL = "https://script.google.com/macros/s/AKfycbzGVW4g9cQFJ9Row8Uw9Z9fobFbZScIT5tNFzxAyLg1161R8fbICME-ATE-0uUr41_w/exec";
+        const API_URL = "https://script.google.com/macros/s/AKfycbzhCzGm1jagx3MhDikUjvq7tHs5K1w5jFTIeUdX6KPbqImSZbruNjLE-VuaPQ-uteW3/exec";
         
         let doctors = [];
         let placesService;
@@ -190,7 +190,7 @@
                 }
             } catch (error) {
                 console.error(error);
-                alert("Σφάλμα σύνδεσης με τις επαφές.");
+                alert("Σφάλμα σύνδεσης με τις επαφές. Βεβαιωθείτε ότι είστε συνδεδεμένοι.");
             } finally {
                 btn.innerHTML = originalIcon;
                 btn.disabled = false;
