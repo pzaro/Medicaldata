@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>MediCloud Pro (Geo-Filter)</title>
+    <title>MediCloud Pro (Full Control)</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
@@ -37,13 +37,13 @@
 
         <div id="filterSection" class="bg-white p-3 rounded-xl shadow-sm border border-gray-200 mb-4 flex gap-2 items-center">
             <div class="flex-1">
-                <label class="text-xs font-bold text-gray-500 ml-1">Νομός</label>
+                <label class="text-xs font-bold text-gray-500 ml-1">Φίλτρο Νομού</label>
                 <select id="filterNomos" onchange="filterCities()" class="w-full p-2 border rounded text-sm bg-gray-50 focus:border-teal-500 outline-none">
                     <option value="">Όλοι οι Νομοί</option>
                 </select>
             </div>
             <div class="flex-1">
-                <label class="text-xs font-bold text-gray-500 ml-1">Πόλη</label>
+                <label class="text-xs font-bold text-gray-500 ml-1">Φίλτρο Πόλης</label>
                 <select id="filterCity" onchange="applyFilters()" class="w-full p-2 border rounded text-sm bg-gray-50 focus:border-teal-500 outline-none">
                     <option value="">Όλες οι Πόλεις</option>
                 </select>
@@ -60,23 +60,25 @@
                 <div class="relative bg-blue-50 p-4 rounded-xl border border-blue-100 shadow-inner">
                     <label class="text-xs font-bold text-blue-800 uppercase mb-2 block"><i class="fa-solid fa-magnifying-glass"></i> Αναζητηση (Google Maps)</label>
                     <input type="text" id="google-search" placeholder="Γράψε όνομα (π.χ. Παπαδόπουλος Καρδιολόγος)" class="w-full p-3 border-2 border-blue-200 rounded-lg focus:border-blue-500 outline-none shadow-sm bg-white">
-                    <p class="text-xs text-blue-500 mt-2"><i class="fa-solid fa-arrow-up"></i> Επίλεξε από τη λίστα για αυτόματη συμπλήρωση.</p>
+                    <p class="text-xs text-blue-500 mt-2"><i class="fa-solid fa-arrow-up"></i> Επίλεξε για αυτόματη συμπλήρωση.</p>
                 </div>
 
                 <div class="pt-2 border-t border-gray-100">
-                    <div class="grid grid-cols-2 gap-3 mb-3 bg-gray-50 p-2 rounded border border-gray-200">
+                    
+                    <div class="grid grid-cols-2 gap-3 mb-3 bg-gray-50 p-3 rounded-lg border border-gray-200">
                         <div>
-                            <label class="text-xs font-bold text-gray-500">Νομός (Auto)</label>
-                            <input type="text" id="nomos" readonly class="w-full bg-transparent text-sm font-semibold text-teal-700 outline-none" placeholder="-">
+                            <label class="text-xs font-bold text-teal-800 ml-1">Νομός</label>
+                            <input list="greekNomoiList" type="text" id="nomos" class="w-full p-2 border rounded bg-white focus:ring-2 focus:ring-teal-500 outline-none text-sm" placeholder="Επίλεξε ή γράψε...">
+                            <datalist id="greekNomoiList"></datalist>
                         </div>
                         <div>
-                            <label class="text-xs font-bold text-gray-500">Πόλη (Auto)</label>
-                            <input type="text" id="city" readonly class="w-full bg-transparent text-sm font-semibold text-teal-700 outline-none" placeholder="-">
+                            <label class="text-xs font-bold text-teal-800 ml-1">Πόλη</label>
+                            <input type="text" id="city" class="w-full p-2 border rounded bg-white focus:ring-2 focus:ring-teal-500 outline-none text-sm" placeholder="Πόλη/Περιοχή">
                         </div>
                     </div>
 
                     <input type="text" id="name" placeholder="Ονοματεπώνυμο" required class="w-full p-3 border rounded-lg bg-gray-50 focus:bg-white focus:ring-2 focus:ring-teal-500 outline-none transition mb-3 font-bold text-gray-800">
-                    <input type="text" id="address" placeholder="Διεύθυνση" class="w-full p-3 border rounded-lg bg-gray-50 focus:bg-white focus:ring-2 focus:ring-teal-500 outline-none transition mb-3">
+                    <input type="text" id="address" placeholder="Διεύθυνση (Οδός & Αριθμός)" class="w-full p-3 border rounded-lg bg-gray-50 focus:bg-white focus:ring-2 focus:ring-teal-500 outline-none transition mb-3">
                     
                     <div class="grid grid-cols-2 gap-3 mb-3">
                         <div>
@@ -92,7 +94,7 @@
                     <input type="email" id="email" placeholder="Email" class="w-full p-3 border rounded-lg bg-gray-50 focus:bg-white focus:ring-2 focus:ring-teal-500 outline-none mb-3">
                     
                     <div class="mb-3 bg-gray-50 p-3 rounded-lg border border-gray-100">
-                        <label class="text-xs font-bold text-gray-500 ml-1">Ειδικότητα (Αυτόματη Επιλογή):</label>
+                        <label class="text-xs font-bold text-gray-500 ml-1">Ειδικότητα:</label>
                         <div class="grid grid-cols-2 gap-2 text-sm mt-2">
                             <label class="flex items-center p-2 bg-white border rounded hover:bg-gray-50 cursor-pointer"><input type="radio" name="specialty" value="Παθολόγος" class="mr-2 accent-teal-600"> Παθολόγος</label>
                             <label class="flex items-center p-2 bg-white border rounded hover:bg-gray-50 cursor-pointer"><input type="radio" name="specialty" value="Καρδιολόγος" class="mr-2 accent-teal-600"> Καρδιολόγος</label>
@@ -124,11 +126,34 @@
         let doctors = [];
         let placesService;
 
+        // --- Λίστα Νομών Ελλάδας ---
+        const greekNomoi = [
+            "Αιτωλοακαρνανίας", "Αργολίδας", "Αρκαδίας", "Άρτας", "Αττικής", 
+            "Αχαΐας", "Βοιωτίας", "Γρεβενών", "Δράμας", "Δωδεκανήσου", 
+            "Έβρου", "Εύβοιας", "Ευρυτανίας", "Ζακύνθου", "Ηλείας", 
+            "Ημαθίας", "Ηρακλείου", "Θεσπρωτίας", "Θεσσαλονίκης", "Ιωαννίνων", 
+            "Καβάλας", "Καρδίτσας", "Καστοριάς", "Κέρκυρας", "Κεφαλληνίας", 
+            "Κιλκίς", "Κοζάνης", "Κορινθίας", "Κυκλάδων", "Λακωνίας", 
+            "Λάρισας", "Λασιθίου", "Λέσβου", "Λευκάδας", "Μαγνησίας", 
+            "Μεσσηνίας", "Ξάνθης", "Πειραιώς", "Πέλλας", "Πιερίας", 
+            "Πρέβεζας", "Ρεθύμνης", "Ροδόπης", "Σάμου", "Σερρών", 
+            "Τρικάλων", "Φθιώτιδας", "Φλώρινας", "Φωκίδας", "Χαλκιδικής", 
+            "Χανίων", "Χίου"
+        ];
+
         // --- Google Logic ---
         function initMap() {
+            // Γέμισμα της λίστας Νομών
+            const datalist = document.getElementById('greekNomoiList');
+            greekNomoi.forEach(nomos => {
+                const option = document.createElement('option');
+                option.value = nomos;
+                datalist.appendChild(option);
+            });
+
             const input = document.getElementById("google-search");
             const options = {
-                fields: ["formatted_address", "name", "formatted_phone_number", "website", "types", "address_components"], // Ζητάμε components για νομό/πόλη
+                fields: ["formatted_address", "name", "formatted_phone_number", "website", "types", "address_components"], 
                 componentRestrictions: { country: "gr" }, 
                 types: ["establishment"], 
             };
@@ -144,7 +169,6 @@
                     document.getElementById("address").value = place.formatted_address.replace(", Ελλάδα", "");
                 }
                 
-                // --- ΕΞΑΓΩΓΗ ΝΟΜΟΥ ΚΑΙ ΠΟΛΗΣ ---
                 extractLocationDetails(place);
 
                 if (place.formatted_phone_number) processPhone(place.formatted_phone_number, 'form');
@@ -157,7 +181,6 @@
             placesService = new google.maps.places.PlacesService(document.getElementById('placesServiceHelper'));
         }
 
-        // ΝΕΑ ΣΥΝΑΡΤΗΣΗ: Βρίσκει Νομό και Πόλη από τα δεδομένα της Google
         function extractLocationDetails(place) {
             let city = '';
             let nomos = '';
@@ -168,18 +191,22 @@
                     if (types.includes('locality')) {
                         city = component.long_name;
                     } else if (types.includes('administrative_area_level_3') && !city) {
-                        city = component.long_name; // Fallback για πόλη
+                        city = component.long_name; 
                     }
                     
                     if (types.includes('administrative_area_level_2')) {
-                        nomos = component.long_name.replace('Περιφερειακή Ενότητα ', '').replace('Νομός ', '');
+                        let extractedNomos = component.long_name.replace('Περιφερειακή Ενότητα ', '').replace('Νομός ', '');
+                        // Προσπάθεια ταύτισης με τη λίστα μας
+                        const match = greekNomoi.find(n => n.includes(extractedNomos) || extractedNomos.includes(n));
+                        nomos = match || extractedNomos;
                     } else if (types.includes('administrative_area_level_1') && !nomos) {
-                        nomos = component.long_name; // Fallback για νομό (π.χ. Αττική)
+                        nomos = component.long_name; 
                     }
                 }
             }
-            document.getElementById('city').value = city;
-            document.getElementById('nomos').value = nomos;
+            // Αν βρήκε κάτι το βάζει, αλλιώς αφήνει τον χρήστη να γράψει
+            if(city) document.getElementById('city').value = city;
+            if(nomos) document.getElementById('nomos').value = nomos;
         }
 
         function processPhone(rawNumber, target) {
@@ -206,7 +233,7 @@
             let foundSpec = 'Άλλο';
 
             if (types.includes('dentist') || nameLower.includes('οδοντίατρ')) foundSpec = 'Γενικός Χειρουργός';
-            else if (nameLower.includes('οφθαλμίατρ')) foundSpec = 'Γενικός Οικογενειακός Ιατρός';
+            else if (nameLower.includes('οφθαλμίατρ') || nameLower.includes('οφθαλμολογ')) foundSpec = 'Γενικός Οικογενειακός Ιατρός';
             else if (nameLower.includes('ορθοπεδικ') || nameLower.includes('ορθοπαιδικ')) foundSpec = 'Χειρουργός Ορθοπεδικός';
             else if (nameLower.includes('καρδιολόγ')) foundSpec = 'Καρδιολόγος';
             else if (nameLower.includes('γενικός') || nameLower.includes('οικογενειακ')) foundSpec = 'Γενικός Οικογενειακός Ιατρός';
@@ -255,13 +282,9 @@
             const nomosSelect = document.getElementById('filterNomos');
             const citySelect = document.getElementById('filterCity');
             
-            // Παίρνουμε τους μοναδικούς νομούς
             const uniqueNomoi = [...new Set(doctors.map(d => d.nomos).filter(Boolean))].sort();
-            
-            // Κρατάμε την τρέχουσα επιλογή
             const currentNomos = nomosSelect.value;
 
-            // Καθαρισμός και γέμισμα νομών
             nomosSelect.innerHTML = '<option value="">Όλοι οι Νομοί</option>';
             uniqueNomoi.forEach(n => {
                 const option = document.createElement('option');
@@ -270,21 +293,18 @@
                 nomosSelect.appendChild(option);
             });
 
-            // Επαναφορά επιλογής
             nomosSelect.value = currentNomos;
-            filterCities(); // Ενημέρωση πόλεων
+            filterCities(); 
         }
 
         function filterCities() {
             const nomosSelect = document.getElementById('filterNomos');
             const citySelect = document.getElementById('filterCity');
             const selectedNomos = nomosSelect.value;
-            const currentCity = citySelect.value;
 
             citySelect.innerHTML = '<option value="">Όλες οι Πόλεις</option>';
 
             if (selectedNomos) {
-                // Βρες πόλεις μόνο για τον επιλεγμένο νομό
                 const uniqueCities = [...new Set(doctors
                     .filter(d => d.nomos === selectedNomos)
                     .map(d => d.city)
@@ -297,7 +317,6 @@
                     citySelect.appendChild(option);
                 });
             } else {
-                // Αν δεν επιλεχθεί νομός, δείξε όλες τις πόλεις (προαιρετικό)
                 const allCities = [...new Set(doctors.map(d => d.city).filter(Boolean))].sort();
                 allCities.forEach(c => {
                      const option = document.createElement('option');
@@ -319,7 +338,6 @@
             filterCities();
         }
 
-
         // --- App Logic ---
         document.addEventListener('DOMContentLoaded', () => {
             const saved = localStorage.getItem('backupDoctors');
@@ -340,7 +358,7 @@
                     doctors = data.sort((a, b) => b.id - a.id);
                     localStorage.setItem('backupDoctors', JSON.stringify(doctors));
                     renderList();
-                    populateFilters(); // Ενημέρωση φίλτρων με τα νέα δεδομένα
+                    populateFilters(); 
                     btn.innerHTML = '<i class="fa-solid fa-check text-green-300"></i>';
                     setTimeout(() => btn.innerHTML = '<i class="fa-solid fa-rotate"></i>', 2000);
                 }
@@ -393,7 +411,7 @@
 
             doctors.unshift(newDoc);
             localStorage.setItem('backupDoctors', JSON.stringify(doctors));
-            populateFilters(); // Ανανέωση φίλτρων με τον νέο γιατρό
+            populateFilters(); 
             renderList();
             toggleForm();
             document.querySelector('form').reset();
@@ -405,7 +423,6 @@
             const filterNomos = document.getElementById('filterNomos').value;
             const filterCity = document.getElementById('filterCity').value;
 
-            // Φιλτράρισμα λίστας
             const filteredDoctors = doctors.filter(doc => {
                 const matchNomos = filterNomos ? doc.nomos === filterNomos : true;
                 const matchCity = filterCity ? doc.city === filterCity : true;
