@@ -3,124 +3,145 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Cloud Medical CRM</title>
+    <title>Medical App (Safe Mode)</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         body { font-family: system-ui, -apple-system, sans-serif; background-color: #f0fdfa; }
-        #loader { position: fixed; inset: 0; background: rgba(255,255,255,0.95); z-index: 50; display: flex; flex-direction: column; align-items: center; justify-content: center; }
+        /* Αφαιρούμε τελείως το CSS του Loader για να μην μπλοκάρει τίποτα */
     </style>
 </head>
 <body class="pb-24">
 
-    <div id="loader">
-        <div id="spinner" class="animate-spin rounded-full h-16 w-16 border-t-4 border-b-4 border-teal-600 mb-4"></div>
-        <p id="loader-msg" class="text-teal-800 font-bold text-lg">Σύνδεση με Google...</p>
-        <button onclick="document.getElementById('loader').classList.add('hidden')" class="mt-8 text-sm text-gray-400 underline hover:text-gray-600">
-            Κόλλησε; Πατήστε εδώ για είσοδο.
-        </button>
-    </div>
-
-    <div id="errorBox" class="hidden container mx-auto p-4 max-w-2xl mt-4">
-        <div class="bg-red-50 border-l-4 border-red-500 text-red-700 p-4 rounded shadow">
-            <p class="font-bold">Πρόβλημα Σύνδεσης:</p>
-            <p id="errorText" class="text-sm"></p>
-        </div>
-    </div>
-
-    <header class="bg-gradient-to-r from-teal-600 to-teal-500 text-white p-4 sticky top-0 z-40 shadow-lg flex justify-between items-center">
-        <h1 class="text-xl font-bold"><i class="fa-solid fa-cloud-arrow-up mr-2"></i>MediCloud</h1>
+    <header class="bg-teal-600 text-white p-4 sticky top-0 z-40 shadow flex justify-between items-center">
+        <h1 class="text-xl font-bold">MediCloud</h1>
         <div class="flex gap-2">
-            <button onclick="location.reload()" class="bg-teal-700 text-white w-10 h-10 rounded-full hover:bg-teal-800 shadow">
+            <button onclick="syncData()" id="syncBtn" class="bg-teal-700 w-10 h-10 rounded-full flex items-center justify-center">
                 <i class="fa-solid fa-rotate"></i>
             </button>
-            <button onclick="toggleForm()" class="bg-white text-teal-600 px-4 py-2 rounded-full text-sm font-bold shadow hover:bg-gray-100">
+            <button onclick="toggleForm()" class="bg-white text-teal-600 px-4 py-2 rounded-full text-sm font-bold shadow">
                 <i class="fa-solid fa-plus"></i> Νέος
             </button>
         </div>
     </header>
 
+    <div id="statusMsg" class="hidden bg-yellow-100 border-l-4 border-yellow-500 text-yellow-700 p-4 m-4 text-sm"></div>
+
     <main class="container mx-auto p-4 max-w-2xl">
-        <div id="doctorForm" class="hidden bg-white p-6 rounded-2xl shadow-xl mb-6 border-t-4 border-teal-500">
-            <h2 class="text-xl font-bold mb-4 text-gray-700">Νέα Καταχώρηση</h2>
+        
+        <div id="doctorForm" class="hidden bg-white p-6 rounded-xl shadow-lg mb-6 border-t-4 border-teal-500">
+            <h2 class="text-lg font-bold mb-4">Νέα Καταχώρηση</h2>
             <form onsubmit="saveDoctor(event)" class="space-y-4">
-                <input type="text" id="name" placeholder="Ονοματεπώνυμο" required class="w-full p-3 border rounded-xl bg-gray-50">
-                <input type="text" id="address" placeholder="Διεύθυνση" class="w-full p-3 border rounded-xl bg-gray-50">
+                <input type="text" id="name" placeholder="Ονοματεπώνυμο" required class="w-full p-3 border rounded bg-gray-50">
+                <input type="text" id="address" placeholder="Διεύθυνση" class="w-full p-3 border rounded bg-gray-50">
                 <div class="grid grid-cols-2 gap-3">
-                    <input type="tel" id="mobile" placeholder="Κινητό" class="w-full p-3 border rounded-xl bg-gray-50">
-                    <input type="tel" id="landline" placeholder="Σταθερό" class="w-full p-3 border rounded-xl bg-gray-50">
+                    <input type="tel" id="mobile" placeholder="Κινητό" class="w-full p-3 border rounded bg-gray-50">
+                    <input type="tel" id="landline" placeholder="Σταθερό" class="w-full p-3 border rounded bg-gray-50">
                 </div>
-                <input type="email" id="email" placeholder="Email" class="w-full p-3 border rounded-xl bg-gray-50">
+                <input type="email" id="email" placeholder="Email" class="w-full p-3 border rounded bg-gray-50">
                 
                 <div class="mt-2">
                     <label class="font-bold text-gray-600 text-sm">Ειδικότητα:</label>
                     <div class="grid grid-cols-2 gap-2 text-sm mt-1">
-                        <label class="flex items-center p-2 border rounded hover:bg-gray-50"><input type="checkbox" name="specialty" value="Παθολόγος" class="mr-2"> Παθολόγος</label>
-                        <label class="flex items-center p-2 border rounded hover:bg-gray-50"><input type="checkbox" name="specialty" value="Καρδιολόγος" class="mr-2"> Καρδιολόγος</label>
-                        <label class="flex items-center p-2 border rounded hover:bg-gray-50"><input type="checkbox" name="specialty" value="Οδοντίατρος" class="mr-2"> Οδοντίατρος</label>
-                        <label class="flex items-center p-2 border rounded hover:bg-gray-50"><input type="checkbox" name="specialty" value="Οφθαλμίατρος" class="mr-2"> Οφθαλμίατρος</label>
-                        <label class="flex items-center p-2 border rounded hover:bg-gray-50"><input type="checkbox" name="specialty" value="Ορθοπεδικός" class="mr-2"> Ορθοπεδικός</label>
-                        <label class="flex items-center p-2 border rounded hover:bg-gray-50"><input type="checkbox" name="specialty" value="Δερματολόγος" class="mr-2"> Δερματολόγος</label>
+                        <label class="flex items-center p-2 border rounded"><input type="checkbox" name="specialty" value="Παθολόγος" class="mr-2"> Παθολόγος</label>
+                        <label class="flex items-center p-2 border rounded"><input type="checkbox" name="specialty" value="Καρδιολόγος" class="mr-2"> Καρδιολόγος</label>
+                        <label class="flex items-center p-2 border rounded"><input type="checkbox" name="specialty" value="Οδοντίατρος" class="mr-2"> Οδοντίατρος</label>
+                        <label class="flex items-center p-2 border rounded"><input type="checkbox" name="specialty" value="Οφθαλμίατρος" class="mr-2"> Οφθαλμίατρος</label>
+                        <label class="flex items-center p-2 border rounded"><input type="checkbox" name="specialty" value="Ορθοπεδικός" class="mr-2"> Ορθοπεδικός</label>
+                        <label class="flex items-center p-2 border rounded"><input type="checkbox" name="specialty" value="Δερματολόγος" class="mr-2"> Δερματολόγος</label>
                     </div>
                 </div>
-                <textarea id="notes" placeholder="Σημειώσεις..." class="w-full p-3 border rounded-xl h-24 bg-gray-50"></textarea>
-                <button type="submit" class="w-full bg-teal-600 text-white py-3 rounded-xl font-bold shadow hover:bg-teal-700">Αποθήκευση</button>
+                <textarea id="notes" placeholder="Σημειώσεις..." class="w-full p-3 border rounded h-24 bg-gray-50"></textarea>
+                <button type="submit" class="w-full bg-teal-600 text-white py-3 rounded font-bold shadow">Αποθήκευση</button>
             </form>
         </div>
 
-        <div id="doctorsList" class="space-y-5"></div>
+        <div id="doctorsList" class="space-y-4">
+            <div class="text-center text-gray-400 mt-10">
+                <p>Φόρτωση...</p>
+            </div>
+        </div>
+
     </main>
 
     <script>
-        // --- ΤΟ URL ΣΟΥ (Επιβεβαιωμένο ότι δουλεύει) ---
+        // ΤΟ URL ΣΟΥ
         const API_URL = "https://script.google.com/macros/s/AKfycbxxRSXP6miPqmMFaTDtBAtRKmgJwwvdxHzYRo9PExwmbxY8k14l_b3HXpMi4Y3UFS5W/exec";
 
-        let localDoctors = [];
+        let doctors = [];
 
-        document.addEventListener('DOMContentLoaded', initApp);
+        // 1. Ξεκινάμε ΑΜΕΣΩΣ
+        document.addEventListener('DOMContentLoaded', () => {
+            // Πρώτα εμφανίζουμε ό,τι έχουμε τοπικά (αν υπάρχει)
+            const saved = localStorage.getItem('backupDoctors');
+            if (saved) {
+                doctors = JSON.parse(saved);
+                renderList();
+            } else {
+                renderList(); // Εμφανίζει κενή λίστα
+            }
+            
+            // Μετά προσπαθούμε να πάρουμε από Google
+            syncData();
+        });
 
-        async function initApp() {
+        async function syncData() {
+            const btn = document.getElementById('syncBtn');
+            const status = document.getElementById('statusMsg');
+            
+            // Ένδειξη φόρτωσης στο κουμπί
+            btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i>';
+            status.classList.add('hidden');
+
             try {
-                // 1. Ζητάμε τα δεδομένα
                 const response = await fetch(API_URL);
                 
-                // 2. Αν πάρουμε απάντηση, κρύβουμε το loader
-                const data = await response.json();
-                document.getElementById('loader').classList.add('hidden');
+                if (!response.ok) throw new Error("Server Error: " + response.status);
 
-                // 3. Ελέγχουμε τι ήρθε
+                const data = await response.json();
+
                 if (Array.isArray(data)) {
-                    localDoctors = data.sort((a, b) => b.id - a.id);
+                    doctors = data.sort((a, b) => b.id - a.id);
+                    localStorage.setItem('backupDoctors', JSON.stringify(doctors)); // Αποθήκευση αντιγράφου
                     renderList();
+                    btn.innerHTML = '<i class="fa-solid fa-check text-green-300"></i>';
+                    setTimeout(() => btn.innerHTML = '<i class="fa-solid fa-rotate"></i>', 2000);
                 } else {
-                    showError("Η Google επέστρεψε άγνωστη μορφή δεδομένων.");
+                    throw new Error("Έλαβα λάθος μορφή δεδομένων");
                 }
 
-            } catch (err) {
-                // Αν αποτύχει, δείξε το σφάλμα στην οθόνη
-                document.getElementById('loader').classList.add('hidden');
-                showError("Δεν ήταν δυνατή η σύνδεση. Αν το τρέχετε τοπικά, ανεβάστε το στο Netlify. (Error: " + err.message + ")");
+            } catch (error) {
+                console.error(error);
+                btn.innerHTML = '<i class="fa-solid fa-exclamation text-red-300"></i>';
+                
+                status.classList.remove('hidden');
+                status.innerHTML = `
+                    <b>⚠️ Πρόβλημα Σύνδεσης:</b> Δεν καταφέραμε να κατεβάσουμε τα δεδομένα από το Google Sheet.<br>
+                    <span class="text-xs mt-1 block">Μπορείτε να συνεχίσετε να χρησιμοποιείτε την εφαρμογή. Η αποθήκευση θα ξαναδοκιμαστεί στην επόμενη κίνηση.</span>
+                    <br><span class="text-xs text-gray-500">Λεπτομέρειες: ${error.message}</span>
+                `;
             }
         }
 
-        async function syncCloud() {
-            // Στέλνουμε τα δεδομένα χωρίς να περιμένουμε απάντηση (για ταχύτητα & αποφυγή CORS block)
-            await fetch(API_URL, {
-                method: 'POST',
-                mode: 'no-cors',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ doctors: localDoctors })
-            });
+        async function saveToCloud() {
+            // Αποθήκευση στο παρασκήνιο (Fire and forget)
+            try {
+                await fetch(API_URL, {
+                    method: 'POST',
+                    mode: 'no-cors',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ doctors: doctors })
+                });
+            } catch (e) {
+                console.log("Save failed silently:", e);
+            }
         }
 
-        // --- Βοηθητικές Συναρτήσεις ---
+        // --- UI LOGIC ---
 
-        function showError(msg) {
-            document.getElementById('errorBox').classList.remove('hidden');
-            document.getElementById('errorText').textContent = msg;
+        function toggleForm() {
+            document.getElementById('doctorForm').classList.toggle('hidden');
         }
-
-        function toggleForm() { document.getElementById('doctorForm').classList.toggle('hidden'); }
 
         function saveDoctor(e) {
             e.preventDefault();
@@ -138,42 +159,46 @@
                 visits: []
             };
 
-            localDoctors.unshift(newDoc);
+            doctors.unshift(newDoc);
+            localStorage.setItem('backupDoctors', JSON.stringify(doctors)); // Τοπικό backup
+            
             renderList();
             toggleForm();
             document.querySelector('form').reset();
-            syncCloud(); // Αποθήκευση στο παρασκήνιο
+            
+            saveToCloud(); // Προσπάθεια αποστολής
         }
 
         function renderList() {
             const list = document.getElementById('doctorsList');
             list.innerHTML = '';
-            
-            if (localDoctors.length === 0) {
-                list.innerHTML = `<div class="text-center text-gray-400 mt-10">Η λίστα είναι κενή.</div>`;
+
+            if (doctors.length === 0) {
+                list.innerHTML = `<div class="text-center text-gray-400 mt-10">Η λίστα είναι κενή.<br>Πατήστε "Νέος" για αρχή.</div>`;
                 return;
             }
 
-            localDoctors.forEach(doc => {
+            doctors.forEach(doc => {
                 const mapLink = doc.address ? `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(doc.address)}` : '#';
                 
                 list.innerHTML += `
-                    <div class="bg-white rounded-2xl shadow p-5 relative border border-gray-100">
-                        <h3 class="font-bold text-lg text-gray-800">${doc.name}</h3>
-                        <div class="text-xs text-teal-600 font-bold mb-3">${doc.specialties.join(', ')}</div>
+                    <div class="bg-white rounded shadow p-4 relative border border-gray-100">
+                        <h3 class="font-bold text-lg">${doc.name}</h3>
+                        <div class="text-xs text-teal-600 font-bold mb-2">${doc.specialties.join(', ')}</div>
                         
-                        <div class="flex gap-2 mb-3">
-                            ${doc.mobile ? `<a href="tel:${doc.mobile}" class="flex-1 bg-green-50 text-green-700 py-2 rounded text-center text-sm font-bold border border-green-200">Κλήση</a>` : ''}
-                            ${doc.address ? `<a href="${mapLink}" target="_blank" class="flex-1 bg-blue-50 text-blue-700 py-2 rounded text-center text-sm font-bold border border-blue-200">GPS</a>` : ''}
+                        <div class="flex gap-2 mb-2">
+                            ${doc.mobile ? `<a href="tel:${doc.mobile}" class="flex-1 bg-green-50 text-green-800 py-2 rounded text-center text-sm border">Κλήση</a>` : ''}
+                            ${doc.address ? `<a href="${mapLink}" target="_blank" class="flex-1 bg-blue-50 text-blue-800 py-2 rounded text-center text-sm border">Χάρτης</a>` : ''}
                         </div>
 
-                        ${doc.notes ? `<div class="bg-yellow-50 p-2 text-sm italic text-gray-600 rounded mb-2">${doc.notes}</div>` : ''}
+                        ${doc.notes ? `<div class="bg-gray-50 p-2 text-sm italic rounded mb-2">${doc.notes}</div>` : ''}
                         
-                        <div class="border-t pt-2">
-                             <input type="text" placeholder="Προσθήκη επίσκεψης..." class="w-full text-sm p-2 border rounded mb-2" onkeydown="if(event.key==='Enter'){addVisit(${doc.id}, this.value); this.value='';}">
-                             <ul class="text-xs text-gray-500 space-y-1">
+                        <div class="border-t pt-2 mt-2">
+                            <input type="text" placeholder="Προσθήκη επίσκεψης (Enter)..." class="w-full text-sm p-2 border rounded" 
+                            onkeydown="if(event.key==='Enter'){addVisit(${doc.id}, this.value); this.value='';}">
+                            <ul class="text-xs text-gray-500 mt-2 space-y-1">
                                 ${(doc.visits || []).map(v => `<li><b>${v.date}:</b> ${v.text}</li>`).join('')}
-                             </ul>
+                            </ul>
                         </div>
                     </div>
                 `;
@@ -182,11 +207,12 @@
 
         function addVisit(id, text) {
             if(!text) return;
-            const doc = localDoctors.find(d => d.id === id);
+            const doc = doctors.find(d => d.id === id);
             if(doc) {
                 doc.visits.unshift({ date: new Date().toLocaleDateString('el-GR'), text });
+                localStorage.setItem('backupDoctors', JSON.stringify(doctors));
                 renderList();
-                syncCloud();
+                saveToCloud();
             }
         }
     </script>
