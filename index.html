@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>MediCloud Pro (Fix Vascular)</title>
+    <title>MediCloud Pro (Public Health)</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
@@ -37,13 +37,13 @@
 
         <div id="filterSection" class="bg-white p-3 rounded-xl shadow-sm border border-gray-200 mb-4 flex gap-2 items-center">
             <div class="flex-1">
-                <label class="text-xs font-bold text-gray-500 ml-1">Φίλτρο Νομού</label>
-                <select id="filterNomos" onchange="filterCities()" class="w-full p-2 border rounded text-sm bg-gray-50 focus:border-teal-500 outline-none">
+                <label class="text-xs font-bold text-gray-500 ml-1">Νομός</label>
+                <select id="filterNomos" onchange="handleNomosChange()" class="w-full p-2 border rounded text-sm bg-gray-50 focus:border-teal-500 outline-none">
                     <option value="">Όλοι οι Νομοί</option>
                 </select>
             </div>
             <div class="flex-1">
-                <label class="text-xs font-bold text-gray-500 ml-1">Φίλτρο Πόλης</label>
+                <label class="text-xs font-bold text-gray-500 ml-1">Πόλη</label>
                 <select id="filterCity" onchange="applyFilters()" class="w-full p-2 border rounded text-sm bg-gray-50 focus:border-teal-500 outline-none">
                     <option value="">Όλες οι Πόλεις</option>
                 </select>
@@ -54,44 +54,59 @@
         </div>
         
         <div id="doctorForm" class="hidden bg-white p-6 rounded-2xl shadow-xl mb-6 border-t-4 border-teal-500 slide-in">
-            <h2 class="text-lg font-bold mb-4 text-gray-700">Αυτόματη Καταχώρηση</h2>
+            <h2 class="text-lg font-bold mb-4 text-gray-700">Νέα Καταχώρηση</h2>
             <form onsubmit="saveDoctor(event)" class="space-y-4">
                 
                 <div class="relative bg-blue-50 p-4 rounded-xl border border-blue-100 shadow-inner">
-                    <label class="text-xs font-bold text-blue-800 uppercase mb-2 block"><i class="fa-solid fa-magnifying-glass"></i> Αναζητηση (Google Maps)</label>
-                    <input type="text" id="google-search" placeholder="Γράψε όνομα (π.χ. Παπαδόπουλος Καρδιολόγος)" class="w-full p-3 border-2 border-blue-200 rounded-lg focus:border-blue-500 outline-none shadow-sm bg-white">
-                    <p class="text-xs text-blue-500 mt-2"><i class="fa-solid fa-arrow-up"></i> Επίλεξε για αυτόματη συμπλήρωση.</p>
+                    <label class="text-xs font-bold text-blue-800 uppercase mb-2 block"><i class="fa-solid fa-magnifying-glass"></i> Google Search</label>
+                    <input type="text" id="google-search" placeholder="Γράψε όνομα (π.χ. Παπαδόπουλος)" class="w-full p-3 border-2 border-blue-200 rounded-lg focus:border-blue-500 outline-none shadow-sm bg-white">
                 </div>
 
                 <div class="pt-2 border-t border-gray-100">
                     
-                    <div class="grid grid-cols-2 gap-3 mb-3 bg-gray-50 p-3 rounded-lg border border-gray-200">
+                    <div class="flex gap-4 mb-4 bg-gray-50 p-3 rounded-lg border border-gray-200">
+                        <label class="flex items-center cursor-pointer">
+                            <input type="radio" name="sector" value="private" checked onclick="toggleSector()" class="mr-2 accent-teal-600 w-4 h-4">
+                            <span class="font-bold text-gray-700">Ιδιώτης</span>
+                        </label>
+                        <label class="flex items-center cursor-pointer">
+                            <input type="radio" name="sector" value="public" onclick="toggleSector()" class="mr-2 accent-teal-600 w-4 h-4">
+                            <span class="font-bold text-gray-700">Δημόσιο (Ε.Σ.Υ.)</span>
+                        </label>
+                    </div>
+
+                    <div class="grid grid-cols-2 gap-3 mb-3">
                         <div>
                             <label class="text-xs font-bold text-teal-800 ml-1">Νομός</label>
-                            <input list="greekNomoiList" type="text" id="nomos" class="w-full p-2 border rounded bg-white focus:ring-2 focus:ring-teal-500 outline-none text-sm" placeholder="Επίλεξε ή γράψε...">
+                            <input list="greekNomoiList" type="text" id="nomos" onchange="updateHealthCentersList()" class="w-full p-2 border rounded bg-white focus:ring-2 focus:ring-teal-500 outline-none text-sm" placeholder="Επίλεξε...">
                             <datalist id="greekNomoiList"></datalist>
                         </div>
                         <div>
                             <label class="text-xs font-bold text-teal-800 ml-1">Πόλη</label>
-                            <input type="text" id="city" class="w-full p-2 border rounded bg-white focus:ring-2 focus:ring-teal-500 outline-none text-sm" placeholder="Πόλη/Περιοχή">
+                            <input type="text" id="city" class="w-full p-2 border rounded bg-white focus:ring-2 focus:ring-teal-500 outline-none text-sm" placeholder="Πόλη">
                         </div>
                     </div>
 
+                    <div id="publicSectorFields" class="hidden mb-3 animate-fade-in">
+                        <label class="text-xs font-bold text-blue-700 ml-1">Κέντρο Υγείας (Βάσει Νομού)</label>
+                        <select id="healthCenterSelect" class="w-full p-3 border-2 border-blue-100 rounded-lg bg-blue-50 focus:border-blue-500 outline-none text-sm font-bold text-blue-900">
+                            <option value="">Επίλεξε Νομό πρώτα...</option>
+                        </select>
+                        <p class="text-xs text-gray-400 mt-1">* Αν δεν υπάρχει στη λίστα, γράψτε το στη διεύθυνση.</p>
+                        
+                        <label class="text-xs font-bold text-blue-700 ml-1 mt-3 block">Πρόγραμμα Κίνησης / Περιφερειακά Ιατρεία</label>
+                        <textarea id="publicSchedule" placeholder="Π.χ. Δευτέρα ΚΥ, Τρίτη ΠΙ Στεμνίτσας, Τετάρτη Ρεπό..." class="w-full p-2 border rounded bg-white h-16 text-sm"></textarea>
+                    </div>
+
                     <input type="text" id="name" placeholder="Ονοματεπώνυμο" required class="w-full p-3 border rounded-lg bg-gray-50 focus:bg-white focus:ring-2 focus:ring-teal-500 outline-none transition mb-3 font-bold text-gray-800">
-                    <input type="text" id="address" placeholder="Διεύθυνση (Οδός & Αριθμός)" class="w-full p-3 border rounded-lg bg-gray-50 focus:bg-white focus:ring-2 focus:ring-teal-500 outline-none transition mb-3">
+                    <input type="text" id="address" placeholder="Διεύθυνση Ιατρείου" class="w-full p-3 border rounded-lg bg-gray-50 focus:bg-white focus:ring-2 focus:ring-teal-500 outline-none transition mb-3">
                     
                     <div class="grid grid-cols-2 gap-3 mb-3">
-                        <div>
-                            <label class="text-xs font-bold text-gray-500 ml-1">Κινητό</label>
-                            <input type="tel" id="mobile" placeholder="69..." class="w-full p-3 border rounded-lg bg-gray-50 focus:bg-white focus:ring-2 focus:ring-teal-500 outline-none">
-                        </div>
-                        <div>
-                            <label class="text-xs font-bold text-gray-500 ml-1">Σταθερό</label>
-                            <input type="tel" id="landline" placeholder="21..." class="w-full p-3 border rounded-lg bg-gray-50 focus:bg-white focus:ring-2 focus:ring-teal-500 outline-none">
-                        </div>
+                        <input type="tel" id="mobile" placeholder="Κινητό (69..)" class="w-full p-3 border rounded-lg bg-gray-50 focus:bg-white outline-none">
+                        <input type="tel" id="landline" placeholder="Σταθερό (2..)" class="w-full p-3 border rounded-lg bg-gray-50 focus:bg-white outline-none">
                     </div>
                     
-                    <input type="email" id="email" placeholder="Email" class="w-full p-3 border rounded-lg bg-gray-50 focus:bg-white focus:ring-2 focus:ring-teal-500 outline-none mb-3">
+                    <input type="email" id="email" placeholder="Email" class="w-full p-3 border rounded-lg bg-gray-50 focus:bg-white outline-none mb-3">
                     
                     <div class="mb-3 bg-gray-50 p-3 rounded-lg border border-gray-100">
                         <label class="text-xs font-bold text-gray-500 ml-1">Ειδικότητα:</label>
@@ -103,15 +118,15 @@
                             <label class="flex items-center p-2 bg-white border rounded hover:bg-gray-50 cursor-pointer"><input type="radio" name="specialty" value="Χειρουργός Ορθοπεδικός" class="mr-2 accent-teal-600"> Χειρ. Ορθοπεδικός</label>
                             <label class="flex items-center p-2 bg-white border rounded hover:bg-gray-50 cursor-pointer"><input type="radio" name="specialty" value="Ηπατολόγος" class="mr-2 accent-teal-600"> Ηπατολόγος</label>
                             <label class="flex items-center p-2 bg-white border rounded hover:bg-gray-50 cursor-pointer"><input type="radio" name="specialty" value="Γαστρεντερολόγος" class="mr-2 accent-teal-600"> Γαστρεντερολόγος</label>
-                            <label class="flex items-center p-2 bg-white border rounded hover:bg-gray-50 cursor-pointer"><input type="radio" name="specialty" value="Αγγειοχειρουργός - Αγγειολόγος" class="mr-2 accent-teal-600"> Αγγειοχειρουργός - Αγγειολόγος</label>
+                            <label class="flex items-center p-2 bg-white border rounded hover:bg-gray-50 cursor-pointer"><input type="radio" name="specialty" value="Αγγειοχειρουργός - Αγγειολόγος" class="mr-2 accent-teal-600"> Αγγειοχειρουργός</label>
                             <label class="flex items-center p-2 bg-white border rounded hover:bg-gray-50 cursor-pointer"><input type="radio" name="specialty" value="Άλλο" class="mr-2 accent-teal-600" checked> Άλλο</label>
                         </div>
                     </div>
 
-                    <textarea id="notes" placeholder="Σημειώσεις / Website..." class="w-full p-3 border rounded-lg h-20 bg-gray-50 focus:bg-white focus:ring-2 focus:ring-teal-500 outline-none"></textarea>
+                    <textarea id="notes" placeholder="Σημειώσεις / Website..." class="w-full p-3 border rounded-lg h-20 bg-gray-50 focus:bg-white outline-none"></textarea>
                 </div>
                 
-                <button type="submit" class="w-full bg-teal-600 text-white py-3 rounded-xl font-bold shadow-lg hover:bg-teal-700 transition transform active:scale-95">Αποθήκευση Ιατρού</button>
+                <button type="submit" class="w-full bg-teal-600 text-white py-3 rounded-xl font-bold shadow-lg hover:bg-teal-700 transition transform active:scale-95">Αποθήκευση</button>
             </form>
         </div>
 
@@ -127,28 +142,78 @@
         let doctors = [];
         let placesService;
 
-        // --- Λίστα Νομών Ελλάδας ---
-        const greekNomoi = [
-            "Αιτωλοακαρνανίας", "Αργολίδας", "Αρκαδίας", "Άρτας", "Αττικής", 
-            "Αχαΐας", "Βοιωτίας", "Γρεβενών", "Δράμας", "Δωδεκανήσου", 
-            "Έβρου", "Εύβοιας", "Ευρυτανίας", "Ζακύνθου", "Ηλείας", 
-            "Ημαθίας", "Ηρακλείου", "Θεσπρωτίας", "Θεσσαλονίκης", "Ιωαννίνων", 
-            "Καβάλας", "Καρδίτσας", "Καστοριάς", "Κέρκυρας", "Κεφαλληνίας", 
-            "Κιλκίς", "Κοζάνης", "Κορινθίας", "Κυκλάδων", "Λακωνίας", 
-            "Λάρισας", "Λασιθίου", "Λέσβου", "Λευκάδας", "Μαγνησίας", 
-            "Μεσσηνίας", "Ξάνθης", "Πειραιώς", "Πέλλας", "Πιερίας", 
-            "Πρέβεζας", "Ρεθύμνης", "Ροδόπης", "Σάμου", "Σερρών", 
-            "Τρικάλων", "Φθιώτιδας", "Φλώρινας", "Φωκίδας", "Χαλκιδικής", 
-            "Χανίων", "Χίου"
-        ];
+        // --- ΒΑΣΗ ΔΕΔΟΜΕΝΩΝ ΚΕΝΤΡΩΝ ΥΓΕΙΑΣ (ΔΕΙΓΜΑ) ---
+        // Μπορείς να προσθέσεις όσα θέλεις εδώ
+        const healthCentersDB = {
+            "Αρκαδίας": ["Κ.Υ. Τρίπολης", "Κ.Υ. Άστρους", "Κ.Υ. Λεωνιδίου", "Κ.Υ. Μεγαλόπολης", "Κ.Υ. Δημητσάνας", "Κ.Υ. Τροπαίων"],
+            "Αττικής": ["Κ.Υ. Αλεξάνδρας", "Κ.Υ. Αμαρουσίου", "Κ.Υ. Περιστερίου", "Κ.Υ. Πατησίων", "Κ.Υ. Πειραιά", "Κ.Υ. Γλυφάδας", "Κ.Υ. Βάρης", "Κ.Υ. Μαρκοπούλου", "Κ.Υ. Λαυρίου", "Κ.Υ. Καπανδριτίου"],
+            "Θεσσαλονίκης": ["Κ.Υ. Τούμπας", "Κ.Υ. 25ης Μαρτίου", "Κ.Υ. Ευόσμου", "Κ.Υ. Θέρμης", "Κ.Υ. Διαβατών", "Κ.Υ. Χαλάστρας", "Κ.Υ. Λαγκαδά", "Κ.Υ. Κουφαλίων"],
+            "Αχαΐας": ["Κ.Υ. Πάτρας", "Κ.Υ. Χαλανδρίτσας", "Κ.Υ. Κάτω Αχαΐας", "Κ.Υ. Ερυμάνθειας", "Κ.Υ. Καλαβρύτων", "Κ.Υ. Κλειτορίας", "Κ.Υ. Ακράτας"],
+            "Ηρακλείου": ["Κ.Υ. Ηρακλείου", "Κ.Υ. Μοιρών", "Κ.Υ. Χάρακα", "Κ.Υ. Αρκαλοχωρίου", "Κ.Υ. Καστελλίου", "Κ.Υ. Βιάννου"],
+            "Μεσσηνίας": ["Κ.Υ. Καλαμάτας", "Κ.Υ. Μεσσήνης", "Κ.Υ. Πύλου", "Κ.Υ. Φιλιατρών", "Κ.Υ. Γαργαλιάνων", "Κ.Υ. Αγίου Νικολάου"],
+            "Κορινθίας": ["Κ.Υ. Κορίνθου", "Κ.Υ. Κιάτου", "Κ.Υ. Ξυλοκάστρου", "Κ.Υ. Νεμέας", "Κ.Υ. Λουτρακίου", "Κ.Υ. Γκούρας"],
+            "Λακωνίας": ["Κ.Υ. Σπάρτης", "Κ.Υ. Γυθείου", "Κ.Υ. Αρεόπολης", "Κ.Υ. Βλαχιώτη", "Κ.Υ. Νεάπολης"],
+            "Αργολίδας": ["Κ.Υ. Ναυπλίου", "Κ.Υ. Άργους", "Κ.Υ. Κρανιδίου", "Κ.Υ. Λυγουριού"],
+            "Λάρισας": ["Κ.Υ. Λάρισας", "Κ.Υ. Τυρνάβου", "Κ.Υ. Φαρσάλων", "Κ.Υ. Ελασσόνας", "Κ.Υ. Αγιάς", "Κ.Υ. Γόννων"],
+            "Ιωαννίνων": ["Κ.Υ. Ιωαννίνων", "Κ.Υ. Κόνιτσας", "Κ.Υ. Μετσόβου", "Κ.Υ. Δελβινακίου", "Κ.Υ. Πραμάντων", "Κ.Υ. Δερβιζιάνων"],
+            "Έβρου": ["Κ.Υ. Αλεξανδρούπολης", "Κ.Υ. Σουφλίου", "Κ.Υ. Ορεστιάδας", "Κ.Υ. Δικαίων", "Κ.Υ. Σαμοθράκης"]
+        };
 
-        // --- Helper: Κανονικοποίηση Κειμένου (Αγνόηση τόνων/case) ---
+        const greekNomoi = Object.keys(healthCentersDB).sort(); // Παίρνει τους νομούς από τη βάση μας
+
+        // --- Logic: Δημόσιο vs Ιδιωτικό ---
+        function toggleSector() {
+            const sector = document.querySelector('input[name="sector"]:checked').value;
+            const publicDiv = document.getElementById('publicSectorFields');
+            const addressInput = document.getElementById('address');
+
+            if (sector === 'public') {
+                publicDiv.classList.remove('hidden');
+                updateHealthCentersList(); // Γέμισε τη λίστα βάσει του επιλεγμένου νομού
+                addressInput.placeholder = "Συμπληρώνεται αυτόματα από το Κ.Υ.";
+            } else {
+                publicDiv.classList.add('hidden');
+                addressInput.placeholder = "Διεύθυνση Ιατρείου";
+            }
+        }
+
+        function updateHealthCentersList() {
+            const nomosInput = document.getElementById('nomos').value;
+            const kySelect = document.getElementById('healthCenterSelect');
+            
+            // Βρες τον νομό αγνοώντας τόνους/case
+            const matchedNomos = Object.keys(healthCentersDB).find(n => 
+                normalizeText(n) === normalizeText(nomosInput)
+            );
+
+            kySelect.innerHTML = '<option value="">Επίλεξε Κ.Υ...</option>';
+
+            if (matchedNomos && healthCentersDB[matchedNomos]) {
+                healthCentersDB[matchedNomos].forEach(ky => {
+                    const opt = document.createElement('option');
+                    opt.value = ky;
+                    opt.textContent = ky;
+                    kySelect.appendChild(opt);
+                });
+            } else {
+                kySelect.innerHTML = '<option value="">Δεν βρέθηκαν Κ.Υ. για αυτόν τον Νομό</option>';
+            }
+        }
+
+        // Όταν επιλέγεις ΚΥ, αυτόματα μπαίνει στη διεύθυνση
+        document.getElementById('healthCenterSelect').addEventListener('change', function() {
+            const selectedKY = this.value;
+            if(selectedKY) {
+                document.getElementById('address').value = selectedKY; // Βάζουμε το ΚΥ ως διεύθυνση
+            }
+        });
+
+        // --- Helper Functions ---
         function normalizeText(text) {
             if (!text) return "";
             return text.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase();
         }
 
-        // --- Helper: Κεφαλαίο πρώτο γράμμα (Auto-Capitalize) ---
         function capitalizeWords(str) {
             if (!str) return "";
             return str.replace(/\w\S*/g, function(txt){
@@ -158,6 +223,7 @@
 
         // --- Google Logic ---
         function initMap() {
+            // Fill Nomoi List
             const datalist = document.getElementById('greekNomoiList');
             greekNomoi.forEach(nomos => {
                 const option = document.createElement('option');
@@ -179,16 +245,17 @@
                 if (!place.name) return;
 
                 document.getElementById("name").value = place.name;
-                if (place.formatted_address) {
+                
+                // Διεύθυνση (Αν δεν είναι δημόσιο, βάλε τη διεύθυνση. Αν είναι δημόσιο, θα μπει το ΚΥ)
+                const sector = document.querySelector('input[name="sector"]:checked').value;
+                if (sector === 'private' && place.formatted_address) {
                     document.getElementById("address").value = place.formatted_address.replace(", Ελλάδα", "");
                 }
                 
                 extractLocationDetails(place);
 
                 if (place.formatted_phone_number) processPhone(place.formatted_phone_number, 'form');
-                
                 if (place.website) document.getElementById("notes").value = "Website: " + place.website;
-                
                 detectSpecialty(place);
             });
 
@@ -202,20 +269,12 @@
             if (place.address_components) {
                 for (const component of place.address_components) {
                     const types = component.types;
-                    if (types.includes('locality')) {
-                        city = component.long_name;
-                    } else if (types.includes('administrative_area_level_3') && !city) {
-                        city = component.long_name; 
-                    }
+                    if (types.includes('locality')) city = component.long_name;
+                    else if (types.includes('administrative_area_level_3') && !city) city = component.long_name;
                     
                     if (types.includes('administrative_area_level_2')) {
                         let extractedNomos = component.long_name.replace('Περιφερειακή Ενότητα ', '').replace('Νομός ', '');
-                        
-                        // Smart Match με αγνόηση τόνων και case
-                        const match = greekNomoi.find(n => 
-                            normalizeText(n).includes(normalizeText(extractedNomos)) || 
-                            normalizeText(extractedNomos).includes(normalizeText(n))
-                        );
+                        const match = greekNomoi.find(n => normalizeText(n).includes(normalizeText(extractedNomos)));
                         nomos = match || extractedNomos;
                     } else if (types.includes('administrative_area_level_1') && !nomos) {
                         nomos = component.long_name; 
@@ -223,7 +282,10 @@
                 }
             }
             if(city) document.getElementById('city').value = city;
-            if(nomos) document.getElementById('nomos').value = nomos;
+            if(nomos) {
+                document.getElementById('nomos').value = nomos;
+                updateHealthCentersList(); // Ενημέρωσε τη λίστα ΚΥ αν βρέθηκε νομός
+            }
         }
 
         function processPhone(rawNumber, target) {
@@ -249,38 +311,16 @@
             const types = place.types || [];
             let foundSpec = 'Άλλο';
 
-            // ΠΡΟΣΟΧΗ: Η σειρά έχει σημασία. Ειδικοί χειρουργοί ΠΡΙΝ από το γενικό "χειρουργός"
-            
-            if (nameNorm.includes('αγγειο') || nameNorm.includes('vascular') || nameNorm.includes('angio')) {
-                foundSpec = 'Αγγειοχειρουργός - Αγγειολόγος';
-            }
-            else if (types.includes('dentist') || nameNorm.includes('οδοντιατρ')) {
-                foundSpec = 'Γενικός Χειρουργός';
-            }
-            else if (nameNorm.includes('ορθοπεδικ') || nameNorm.includes('ορθοπαιδικ')) {
-                foundSpec = 'Χειρουργός Ορθοπεδικός';
-            }
-            else if (nameNorm.includes('χειρουργ') || nameNorm.includes('surgeon')) {
-                foundSpec = 'Γενικός Χειρουργός';
-            }
-            else if (nameNorm.includes('οφθαλμιατρ') || nameNorm.includes('οφθαλμολογ')) {
-                foundSpec = 'Γενικός Οικογενειακός Ιατρός';
-            }
-            else if (nameNorm.includes('καρδιολογ')) {
-                foundSpec = 'Καρδιολόγος';
-            }
-            else if (nameNorm.includes('γενικος') || nameNorm.includes('οικογενειακ')) {
-                foundSpec = 'Γενικός Οικογενειακός Ιατρός';
-            }
-            else if (nameNorm.includes('ηπατολογ')) {
-                foundSpec = 'Ηπατολόγος';
-            }
-            else if (nameNorm.includes('γαστρεντερολογ')) {
-                foundSpec = 'Γαστρεντερολόγος';
-            }
-            else if (nameNorm.includes('παθολόγ') || nameNorm.includes('παθολογ')) {
-                foundSpec = 'Παθολόγος';
-            }
+            if (nameNorm.includes('αγγειο') || nameNorm.includes('vascular') || nameNorm.includes('angio')) foundSpec = 'Αγγειοχειρουργός - Αγγειολόγος';
+            else if (types.includes('dentist') || nameNorm.includes('οδοντιατρ')) foundSpec = 'Γενικός Χειρουργός';
+            else if (nameNorm.includes('ορθοπεδικ') || nameNorm.includes('ορθοπαιδικ')) foundSpec = 'Χειρουργός Ορθοπεδικός';
+            else if (nameNorm.includes('χειρουργ') || nameNorm.includes('surgeon')) foundSpec = 'Γενικός Χειρουργός';
+            else if (nameNorm.includes('οφθαλμιατρ') || nameNorm.includes('οφθαλμολογ')) foundSpec = 'Γενικός Οικογενειακός Ιατρός';
+            else if (nameNorm.includes('καρδιολογ')) foundSpec = 'Καρδιολόγος';
+            else if (nameNorm.includes('γενικος') || nameNorm.includes('οικογενειακ')) foundSpec = 'Γενικός Οικογενειακός Ιατρός';
+            else if (nameNorm.includes('ηπατολογ')) foundSpec = 'Ηπατολόγος';
+            else if (nameNorm.includes('γαστρεντερολογ')) foundSpec = 'Γαστρεντερολόγος';
+            else if (nameNorm.includes('παθολόγ') || nameNorm.includes('παθολογ')) foundSpec = 'Παθολόγος';
 
             const radio = document.querySelector(`input[name="specialty"][value="${foundSpec}"]`);
             if(radio) radio.checked = true;
@@ -290,7 +330,7 @@
             const doc = doctors.find(d => d.id === id);
             const btn = document.getElementById(`btn-find-${id}`);
             const originalText = btn.innerHTML;
-            btn.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i> Ψάχνω...`;
+            btn.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i>`;
             btn.classList.add('animate-searching');
             btn.disabled = true;
 
@@ -305,36 +345,20 @@
                         localStorage.setItem('backupDoctors', JSON.stringify(doctors));
                         renderList(); 
                         saveToCloud();
-                        alert(`Βρέθηκε σταθερό: ${phoneInfo.number}`);
+                        alert(`Βρέθηκε: ${phoneInfo.number}`);
                     } else {
-                        btn.innerHTML = `<i class="fa-solid fa-triangle-exclamation"></i> Μόνο κινητό`;
+                        btn.innerHTML = `Μόνο Κιν.`;
                         setTimeout(() => { btn.innerHTML = originalText; btn.disabled = false; }, 3000);
                     }
                 } else {
-                    btn.innerHTML = `<i class="fa-solid fa-xmark"></i> Δεν βρέθηκε`;
+                    btn.innerHTML = `Χ`;
                     setTimeout(() => { btn.innerHTML = originalText; btn.disabled = false; }, 3000);
                 }
             });
         }
 
-        // --- FILTER & SYNC LOGIC ---
-        function populateFilters() {
-            const nomosSelect = document.getElementById('filterNomos');
-            const citySelect = document.getElementById('filterCity');
-            
-            const uniqueNomoi = [...new Set(doctors.map(d => d.nomos).filter(Boolean))].sort();
-            const currentNomos = nomosSelect.value;
-
-            nomosSelect.innerHTML = '<option value="">Όλοι οι Νομοί</option>';
-            uniqueNomoi.forEach(n => {
-                const option = document.createElement('option');
-                option.value = n;
-                option.textContent = n;
-                nomosSelect.appendChild(option);
-            });
-
-            nomosSelect.value = currentNomos;
-            filterCities(); 
+        function handleNomosChange() {
+            filterCities();
         }
 
         function filterCities() {
@@ -368,15 +392,24 @@
             applyFilters();
         }
 
-        function applyFilters() {
-            renderList();
-        }
+        function populateFilters() {
+            const nomosSelect = document.getElementById('filterNomos');
+            const uniqueNomoi = [...new Set(doctors.map(d => d.nomos).filter(Boolean))].sort();
+            const currentNomos = nomosSelect.value;
 
-        function clearFilters() {
-            document.getElementById('filterNomos').value = "";
-            document.getElementById('filterCity').value = "";
+            nomosSelect.innerHTML = '<option value="">Όλοι οι Νομοί</option>';
+            uniqueNomoi.forEach(n => {
+                const option = document.createElement('option');
+                option.value = n;
+                option.textContent = n;
+                nomosSelect.appendChild(option);
+            });
+            nomosSelect.value = currentNomos;
             filterCities();
         }
+
+        function applyFilters() { renderList(); }
+        function clearFilters() { document.getElementById('filterNomos').value = ""; document.getElementById('filterCity').value = ""; filterCities(); }
 
         document.addEventListener('DOMContentLoaded', () => {
             const saved = localStorage.getItem('backupDoctors');
@@ -389,7 +422,6 @@
             const status = document.getElementById('statusMsg');
             btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i>';
             status.classList.add('hidden');
-
             try {
                 const response = await fetch(API_URL);
                 const data = await response.json();
@@ -397,27 +429,19 @@
                     doctors = data.sort((a, b) => b.id - a.id);
                     localStorage.setItem('backupDoctors', JSON.stringify(doctors));
                     renderList();
-                    populateFilters(); 
+                    populateFilters();
                     btn.innerHTML = '<i class="fa-solid fa-check text-green-300"></i>';
                     setTimeout(() => btn.innerHTML = '<i class="fa-solid fa-rotate"></i>', 2000);
                 }
             } catch (error) { 
-                console.error("Offline mode"); 
                 btn.innerHTML = '<i class="fa-solid fa-exclamation text-red-300"></i>';
                 status.classList.remove('hidden');
-                status.innerHTML = `<b>Offline Mode:</b> Δεν υπάρχει σύνδεση με το Google Sheet. Βλέπετε τα αποθηκευμένα.`;
+                status.innerHTML = `<b>Offline Mode</b>`;
             }
         }
 
         async function saveToCloud() {
-            try {
-                await fetch(API_URL, {
-                    method: 'POST',
-                    mode: 'no-cors',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ doctors: doctors })
-                });
-            } catch (e) {}
+            try { await fetch(API_URL, { method: 'POST', mode: 'no-cors', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ doctors: doctors }) }); } catch (e) {}
         }
 
         function toggleForm() { 
@@ -433,16 +457,16 @@
             e.preventDefault();
             const specElement = document.querySelector('input[name="specialty"]:checked');
             const specialty = specElement ? specElement.value : 'Άλλο';
-
-            const rawNomos = document.getElementById('nomos').value;
-            const rawCity = document.getElementById('city').value;
-            const rawName = document.getElementById('name').value;
+            const sector = document.querySelector('input[name="sector"]:checked').value;
+            const publicSchedule = document.getElementById('publicSchedule').value;
 
             const newDoc = {
                 id: Date.now(),
-                nomos: capitalizeWords(rawNomos.trim()),
-                city: capitalizeWords(rawCity.trim()),
-                name: capitalizeWords(rawName.trim()),
+                sector: sector, // 'private' or 'public'
+                schedule: publicSchedule,
+                nomos: capitalizeWords(document.getElementById('nomos').value.trim()),
+                city: capitalizeWords(document.getElementById('city').value.trim()),
+                name: capitalizeWords(document.getElementById('name').value.trim()),
                 address: document.getElementById('address').value.trim(),
                 mobile: document.getElementById('mobile').value.trim(),
                 landline: document.getElementById('landline').value.trim(),
@@ -473,18 +497,20 @@
             });
 
             list.innerHTML = '';
-            if (filteredDoctors.length === 0) { 
-                list.innerHTML = `<div class="text-center text-gray-400 mt-10">Δεν βρέθηκαν ιατροί με αυτά τα κριτήρια.</div>`; 
-                return; 
-            }
+            if (filteredDoctors.length === 0) { list.innerHTML = `<div class="text-center text-gray-400 mt-10">Κενή Λίστα</div>`; return; }
 
             filteredDoctors.forEach(doc => {
                 const mapLink = doc.address ? `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(doc.address)}` : '#';
+                const isPublic = doc.sector === 'public';
+                
                 list.innerHTML += `
-                    <div class="bg-white rounded-xl shadow p-5 border border-gray-100 mb-4 hover:shadow-md transition">
+                    <div class="bg-white rounded-xl shadow p-5 border ${isPublic ? 'border-blue-200 bg-blue-50' : 'border-gray-100'} mb-4 transition">
                         <div class="flex justify-between items-start">
                              <div>
-                                <h3 class="font-bold text-lg text-gray-800">${doc.name}</h3>
+                                <div class="flex items-center gap-2">
+                                    <h3 class="font-bold text-lg text-gray-800">${doc.name}</h3>
+                                    ${isPublic ? '<span class="text-xs bg-blue-600 text-white px-2 py-0.5 rounded">Δημόσιο</span>' : ''}
+                                </div>
                                 <div class="flex gap-2 mt-1">
                                     <span class="bg-teal-50 text-teal-700 text-xs px-2 py-1 rounded border border-teal-100 font-bold">${doc.specialties.join(', ')}</span>
                                     ${doc.city ? `<span class="bg-gray-100 text-gray-600 text-xs px-2 py-1 rounded border border-gray-200"><i class="fa-solid fa-map-pin"></i> ${doc.city}</span>` : ''}
@@ -498,17 +524,19 @@
                              
                              ${doc.landline 
                                 ? `<a href="tel:${doc.landline}" class="flex-1 bg-gray-50 text-gray-700 py-2.5 rounded-lg text-center text-sm font-bold border border-gray-200 hover:bg-gray-100 transition"><i class="fa-solid fa-phone"></i> Σταθερό</a>` 
-                                : `<button id="btn-find-${doc.id}" onclick="findLandline(${doc.id})" class="flex-1 bg-blue-50 text-blue-700 py-2.5 rounded-lg text-center text-sm font-bold border border-blue-200 hover:bg-blue-100 transition"><i class="fa-solid fa-magnifying-glass"></i> Ψάξε Σταθερό</button>`
+                                : `<button id="btn-find-${doc.id}" onclick="findLandline(${doc.id})" class="flex-1 bg-blue-50 text-blue-700 py-2.5 rounded-lg text-center text-sm font-bold border border-blue-200 hover:bg-blue-100 transition"><i class="fa-solid fa-magnifying-glass"></i> Ψάξε</button>`
                              }
                         </div>
                         
-                        ${doc.address ? `<a href="${mapLink}" target="_blank" class="block bg-blue-50 text-blue-700 py-2 rounded-lg text-center text-sm font-bold border border-blue-100 mb-3 hover:bg-blue-100 transition"><i class="fa-solid fa-location-dot"></i> GPS: ${doc.address}</a>` : ''}
+                        ${doc.address ? `<a href="${mapLink}" target="_blank" class="block bg-blue-50 text-blue-700 py-2 rounded-lg text-center text-sm font-bold border border-blue-100 mb-3 hover:bg-blue-100 transition"><i class="fa-solid fa-location-dot"></i> ${doc.address}</a>` : ''}
+                        
+                        ${doc.schedule ? `<div class="bg-white p-3 text-sm text-blue-800 rounded-lg mb-3 border border-blue-200 shadow-sm"><i class="fa-solid fa-calendar-days mr-2"></i> ${doc.schedule}</div>` : ''}
                         
                         ${doc.notes ? `<div class="bg-yellow-50 p-3 text-sm italic text-gray-600 rounded-lg mb-3 border-l-4 border-yellow-200 shadow-sm">${doc.notes}</div>` : ''}
                         
                         <div class="border-t pt-3 bg-gray-50 -mx-5 px-5 pb-3 rounded-b-xl">
                             <div class="relative">
-                                <input type="text" placeholder="Προσθήκη επίσκεψης (Enter)..." class="w-full text-sm p-3 pr-10 border rounded-lg shadow-sm focus:outline-none focus:border-teal-500" onkeydown="if(event.key==='Enter'){addVisit(${doc.id}, this.value); this.value='';}">
+                                <input type="text" placeholder="Προσθήκη επίσκεψης..." class="w-full text-sm p-3 pr-10 border rounded-lg shadow-sm focus:outline-none focus:border-teal-500" onkeydown="if(event.key==='Enter'){addVisit(${doc.id}, this.value); this.value='';}">
                                 <i class="fa-solid fa-turn-down absolute right-3 top-3.5 text-gray-400 text-xs"></i>
                             </div>
                             <ul class="text-xs text-gray-600 mt-3 space-y-2 pl-1 max-h-40 overflow-y-auto">
