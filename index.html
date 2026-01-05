@@ -49,7 +49,6 @@
         .doc-spec { font-size: 13px; background: #e8f0fe; color: #1a73e8; padding: 2px 8px; border-radius: 10px; font-weight: 600; }
         .doc-details p { margin: 3px 0; font-size: 14px; color: #555; }
         .doc-details i { width: 20px; color: #888; text-align: center; }
-        
         .refresh-btn { background: none; border: none; color: #1a73e8; cursor: pointer; font-weight: bold; margin-bottom: 10px; float: right; }
         
         /* Spinner */
@@ -76,9 +75,9 @@
         <label>Διεύθυνση Ιατρείου</label>
         <div class="input-group-container">
             <div class="input-wrapper">
-                <input type="text" id="addressInput" placeholder="Οδός, Αριθμός, Περιοχή">
+                <input type="text" id="addressInput" placeholder="Αυτόματη εύρεση...">
             </div>
-            <button id="btnMapSearch" class="btn-tool btn-map" title="Εύρεση Διεύθυνσης στο Google Maps"><i class="fas fa-map-marker-alt"></i></button>
+            <button id="btnMapSearch" class="btn-tool btn-map" title="Αυτόματη Εύρεση Διεύθυνσης"><i class="fas fa-map-marker-alt"></i></button>
         </div>
     </div>
 
@@ -123,15 +122,13 @@
         <button class="refresh-btn" onclick="loadDoctors()">🔄 Ανανέωση</button>
     </div>
     <div id="doctorsListLoader" style="display:none; text-align:center; padding:20px;"><i class="fas fa-spinner fa-2x"></i></div>
-    <div id="doctorsListContainer">
-        </div>
+    <div id="doctorsListContainer"></div>
 </div>
 
 <script>
-    // --- ΡΥΘΜΙΣΗ URL (Βεβαιώσου ότι είναι το σωστό) ---
-    const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbx_WDKl8szlAPfnchH_1dlBSbFn_EFYcZiHVWTYglciGpH4IzhnBXau9GdLy6Ivuly-/exec";
+    // --- ΤΟ ΝΕΟ URL ΠΟΥ ΕΔΩΣΕΣ ---
+    const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxzU7NyRjIAdgS3BGLlTKXOwpATT-6RokC8nZpO5X09CJnRY2Yaf6mHLfHwsrBdLyUl/exec";
 
-    // DOM Elements
     const DOM = {
         name: document.getElementById("nameInput"),
         address: document.getElementById("addressInput"),
@@ -147,9 +144,8 @@
         loader: document.getElementById("doctorsListLoader")
     };
 
-    // --- 1. ΑΠΟΘΗΚΕΥΣΗ ΔΕΔΟΜΕΝΩΝ (POST) ---
+    // --- 1. ΑΠΟΘΗΚΕΥΣΗ (SAVE) ---
     DOM.submitBtn.addEventListener("click", function() {
-        // Συλλογή δεδομένων
         const name = DOM.name.value.trim();
         if (!name) return alert("Παρακαλώ συμπληρώστε τουλάχιστον το όνομα.");
 
@@ -157,7 +153,6 @@
         const selRadio = document.querySelector('input[name="specialty"]:checked');
         if (selRadio) specialty = (selRadio.value === "Άλλο") ? DOM.specialtyText.value : selRadio.value;
 
-        // Δημιουργία αντικειμένου ιατρού
         const doctorData = {
             id: Date.now(), 
             name: name,
@@ -169,12 +164,10 @@
             notes: DOM.notes.value
         };
 
-        // UI Feedback
         const originalText = this.innerText;
         this.innerText = "⏳ Αποθήκευση...";
         this.disabled = true;
 
-        // Αποστολή στο Script
         fetch(SCRIPT_URL, {
             method: "POST",
             mode: "no-cors", 
@@ -186,7 +179,7 @@
             clearForm();
             this.innerText = originalText;
             this.disabled = false;
-            loadDoctors(); // Ανανέωση λίστας
+            loadDoctors();
         })
         .catch(err => {
             console.error(err);
@@ -196,7 +189,7 @@
         });
     });
 
-    // --- 2. ΦΟΡΤΩΣΗ ΛΙΣΤΑΣ ΙΑΤΡΩΝ (GET) ---
+    // --- 2. ΦΟΡΤΩΣΗ ΛΙΣΤΑΣ (LOAD) ---
     function loadDoctors() {
         DOM.loader.style.display = "block";
         DOM.listContainer.innerHTML = "";
@@ -210,11 +203,9 @@
                     return;
                 }
                 
-                // Render List
                 data.forEach(doc => {
                     const card = document.createElement("div");
                     card.className = "doctor-card";
-                    
                     const spec = (doc.specialties && doc.specialties.length) ? doc.specialties.join(", ") : "Χωρίς ειδικότητα";
                     const phones = [doc.mobile, doc.landline].filter(Boolean).join(" • ");
                     
@@ -237,15 +228,15 @@
             });
     }
 
-    // --- 3. ΛΕΙΤΟΥΡΓΙΕΣ (Autocomplete, Enrich, Map) ---
+    // --- 3. ΕΡΓΑΛΕΙΑ (AUTOCOMPLETE, ENRICH, MAP API) ---
     
-    // Autocomplete Setup
+    // Autocomplete UI
     let timeoutId = null;
     const listDiv = document.createElement("div");
     listDiv.id = "suggestions-list";
     DOM.name.parentNode.appendChild(listDiv);
 
-    // Event: Autocomplete Typing
+    // Event: Autocomplete
     DOM.name.addEventListener("input", function() {
         const query = this.value.trim();
         if (query.length < 2) { listDiv.style.display = "none"; return; }
@@ -256,7 +247,7 @@
         }, 300);
     });
 
-    // Event: Enrich (Blue Button) - Ψάχνει στις επαφές
+    // Event: Enrich (Blue Button)
     DOM.btnEnrich.addEventListener("click", function() {
         const query = DOM.name.value.trim() || DOM.mobile.value.trim();
         if (!query) return alert("Συμπληρώστε όνομα.");
@@ -268,7 +259,7 @@
             }).catch(() => { toggleLoading(this, false); alert("Error."); });
     });
 
-    // Event: MAP BUTTON (ΕΠΙΣΤΡΟΦΗ ΣΤΟ ΑΝΟΙΓΜΑ TAB)
+    // Event: Map API (Red Button) - ΑΥΤΟΜΑΤΗ ΣΥΜΠΛΗΡΩΣΗ
     DOM.btnMap.addEventListener("click", function() {
         const name = DOM.name.value.trim();
         if (!name) return alert("Συμπληρώστε όνομα.");
@@ -276,16 +267,23 @@
         let spec = "";
         const s = document.querySelector('input[name="specialty"]:checked');
         if(s) spec = (s.value === "Άλλο") ? DOM.specialtyText.value : s.value;
-
-        // Φτιάχνουμε Link για Google Maps Search
-        const searchTerm = name + " " + spec + " ιατρείο";
-        const mapUrl = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(searchTerm)}`;
         
-        // Ανοίγουμε σε νέα καρτέλα
-        window.open(mapUrl, '_blank');
+        // Ψάχνουμε "Όνομα Ειδικότητα Ιατρείο"
+        const query = name + " " + spec;
+        
+        toggleLoading(this, true);
+        fetch(`${SCRIPT_URL}?action=getAddress&query=${encodeURIComponent(query)}`)
+            .then(res => res.json()).then(data => {
+                toggleLoading(this, false);
+                if(data.found && data.address) {
+                    DOM.address.value = data.address; // Γεμίζει το πεδίο αυτόματα!
+                } else {
+                    alert("Δεν βρέθηκε ακριβής διεύθυνση.");
+                }
+            }).catch(() => { toggleLoading(this, false); alert("Error."); });
     });
 
-    // Helpers
+    // --- Helpers ---
     function renderSuggestions(list) {
         listDiv.innerHTML = "";
         if(!list || !list.length) { listDiv.style.display = "none"; return; }
@@ -327,8 +325,14 @@
     }
 
     function toggleLoading(btn, isLoading) {
-        if(isLoading) { btn.dataset.html = btn.innerHTML; btn.innerHTML = '<i class="fas fa-spinner"></i>'; btn.disabled = true; }
-        else { btn.innerHTML = btn.dataset.html; btn.disabled = false; }
+        if(isLoading) { 
+            btn.dataset.html = btn.innerHTML; 
+            btn.innerHTML = '<i class="fas fa-spinner"></i>'; 
+            btn.disabled = true; 
+        } else { 
+            btn.innerHTML = btn.dataset.html; 
+            btn.disabled = false; 
+        }
     }
 
     document.querySelectorAll('input[name="specialty"]').forEach(r => {
@@ -336,7 +340,7 @@
     });
     document.addEventListener("click", (e) => { if (!DOM.name.contains(e.target) && !listDiv.contains(e.target)) listDiv.style.display = "none"; });
 
-    // Εκκίνηση: Φόρτωση λίστας
+    // Εκκίνηση
     window.addEventListener("DOMContentLoaded", loadDoctors);
 </script>
 
