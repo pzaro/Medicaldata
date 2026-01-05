@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Medical Data App</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
     <style>
         body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; background-color: #f0f2f5; margin: 0; padding: 20px; display: flex; flex-direction: column; align-items: center; }
         .main-container { background: #fff; padding: 30px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); width: 100%; max-width: 600px; margin-bottom: 30px; border-top: 5px solid #1a73e8; }
@@ -12,8 +13,8 @@
 
         .form-group { margin-bottom: 15px; position: relative; }
         label { display: block; margin-bottom: 8px; font-weight: 600; color: #333; }
-        input[type="text"], input[type="email"] { width: 100%; padding: 12px; border: 2px solid #e0e0e0; border-radius: 8px; font-size: 14px; box-sizing: border-box; transition: 0.3s; }
-        input:focus { border-color: #1a73e8; outline: none; }
+        input[type="text"], input[type="email"], select { width: 100%; padding: 12px; border: 2px solid #e0e0e0; border-radius: 8px; font-size: 14px; box-sizing: border-box; transition: 0.3s; }
+        input:focus, select:focus { border-color: #1a73e8; outline: none; }
         .input-group-container { display: flex; gap: 10px; }
         .input-wrapper { flex: 1; position: relative; }
 
@@ -38,8 +39,14 @@
         .public-sector-toggle { margin-bottom: 15px; background: #e8f0fe; padding: 10px; border-radius: 8px; display: flex; align-items: center; cursor: pointer; border: 1px solid #d2e3fc; }
         .public-sector-toggle input { margin-right: 10px; transform: scale(1.3); }
         .public-sector-fields { display: none; background: #f8f9fa; padding: 15px; border-radius: 8px; border: 1px solid #eee; margin-bottom: 15px; }
-        .schedule-grid { display: grid; grid-template-columns: 1fr 2fr; gap: 10px; align-items: center; margin-bottom: 5px; }
+        
+        .schedule-grid { display: grid; grid-template-columns: 80px 1fr; gap: 10px; align-items: center; margin-bottom: 8px; }
         .schedule-grid label { margin: 0; font-weight: normal; font-size: 14px; }
+        
+        /* Στυλ για τα Select2 Dropdowns */
+        .select2-container { width: 100% !important; }
+        .select2-selection { border: 2px solid #e0e0e0 !important; border-radius: 8px !important; height: 42px !important; display: flex !important; align-items: center !important; }
+        .select2-selection__arrow { height: 40px !important; }
 
         .db-container { width: 100%; max-width: 600px; margin-top: 20px; }
         .doctor-card { background: white; padding: 15px; margin-bottom: 10px; border-radius: 8px; border-left: 5px solid #1a73e8; box-shadow: 0 2px 5px rgba(0,0,0,0.05); position: relative; }
@@ -48,19 +55,17 @@
         .doc-spec { font-size: 13px; background: #e8f0fe; color: #1a73e8; padding: 2px 8px; border-radius: 10px; font-weight: 600; }
         .doc-details p { margin: 3px 0; font-size: 14px; color: #555; }
         .doc-details i { width: 20px; color: #888; text-align: center; }
-        
-        /* ΝΕΟ: Στυλ για το Link του Χάρτη στη λίστα */
         .map-link { text-decoration: none; color: #555; transition: color 0.2s; }
         .map-link:hover { color: #ea4335; font-weight: 500; }
-        .map-link i { color: #ea4335; } /* Κόκκινη πινέζα */
-
+        .map-link i { color: #ea4335; }
         .edit-btn { position: absolute; top: 15px; right: 15px; background: white; border: 1px solid #ccc; border-radius: 50%; width: 30px; height: 30px; cursor: pointer; display: flex; align-items: center; justify-content: center; color: #555; }
         .edit-btn:hover { background: #1a73e8; color: white; border-color: #1a73e8; }
-
         .refresh-btn { background: none; border: none; color: #1a73e8; cursor: pointer; font-weight: bold; margin-bottom: 10px; float: right; }
         .fa-spinner { animation: spin 1s linear infinite; }
         @keyframes spin { 100% { transform: rotate(360deg); } }
     </style>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
 </head>
 <body>
 
@@ -128,15 +133,27 @@
     <div id="publicSectorFields" class="public-sector-fields">
         <div class="form-group">
             <label>Οργανισμός (Νοσοκομείο / Κέντρο Υγείας)</label>
-            <input type="text" id="affiliationInput" placeholder="π.χ. Κ.Υ. Αριδαίας">
+            <select id="affiliationInput" class="select2-search">
+                <option value="">Επιλέξτε...</option>
+                <optgroup label="Νοσοκομεία">
+                    <option value="Γενικό Νοσοκομείο Έδεσσας">Γενικό Νοσοκομείο Έδεσσας</option>
+                    <option value="Γενικό Νοσοκομείο Γιαννιτσών">Γενικό Νοσοκομείο Γιαννιτσών</option>
+                </optgroup>
+                <optgroup label="Κέντρα Υγείας">
+                    <option value="Κέντρο Υγείας Αριδαίας">Κέντρο Υγείας Αριδαίας</option>
+                    <option value="Κέντρο Υγείας Σκύδρας">Κέντρο Υγείας Σκύδρας</option>
+                    <option value="Κέντρο Υγείας Κρύας Βρύσης">Κέντρο Υγείας Κρύας Βρύσης</option>
+                    <option value="Κέντρο Υγείας Άρνισσας">Κέντρο Υγείας Άρνισσας</option>
+                </optgroup>
+            </select>
         </div>
         
-        <label style="margin-bottom:10px;">📅 Πρόγραμμα Επισκέψεων στα Χωριά:</label>
-        <div class="schedule-grid"><label>Δευτέρα:</label><input type="text" id="villageMon" placeholder="Χωριό..."></div>
-        <div class="schedule-grid"><label>Τρίτη:</label><input type="text" id="villageTue" placeholder="Χωριό..."></div>
-        <div class="schedule-grid"><label>Τετάρτη:</label><input type="text" id="villageWed" placeholder="Χωριό..."></div>
-        <div class="schedule-grid"><label>Πέμπτη:</label><input type="text" id="villageThu" placeholder="Χωριό..."></div>
-        <div class="schedule-grid"><label>Παρασκευή:</label><input type="text" id="villageFri" placeholder="Χωριό..."></div>
+        <label style="margin-bottom:10px;">📅 Πρόγραμμα Επισκέψεων στα Χωριά (Ν. Πέλλας):</label>
+        <div class="schedule-grid"><label>Δευτέρα:</label><select id="villageMon" class="select2-search village-select"><option value="">-</option></select></div>
+        <div class="schedule-grid"><label>Τρίτη:</label><select id="villageTue" class="select2-search village-select"><option value="">-</option></select></div>
+        <div class="schedule-grid"><label>Τετάρτη:</label><select id="villageWed" class="select2-search village-select"><option value="">-</option></select></div>
+        <div class="schedule-grid"><label>Πέμπτη:</label><select id="villageThu" class="select2-search village-select"><option value="">-</option></select></div>
+        <div class="schedule-grid"><label>Παρασκευή:</label><select id="villageFri" class="select2-search village-select"><option value="">-</option></select></div>
     </div>
 
     <input type="hidden" id="notesInput">
@@ -156,8 +173,43 @@
 
 <script>
     const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbztdWp7vOsB12PChcZyklXSHCBzGQJZfs6tRhksvXvW6rNp55uC-165EREw0gukjXmR/exec";
-
     let editingId = null;
+
+    // --- ΛΙΣΤΑ ΧΩΡΙΩΝ ΝΟΜΟΥ ΠΕΛΛΑΣ ---
+    const PELLA_VILLAGES = [
+        "Αγάθη", "Αγία Φωτεινή", "Άγιος Αθανάσιος", "Άγιος Δημήτριος", "Άγιος Λουκάς", "Άγιος Παντελεήμονας", "Άγρας", "Αετοχώρι", "Αθύρα", "Ακρολίμνη", "Άλωρος", "Αμπελειές", "Άνυδρο", "Αξός", "Αραβησσός", "Άργισσα", "Αριδαία", "Άρνισσα", "Αρχάγγελος", "Άσπρο", "Αχλαδοχώρι", "Άψαλος",
+        "Βορεινό", "Βρυττά",
+        "Γαλατάδες", "Γαρέφι", "Γιαννιτσά", "Γραμματικό", "Γυψοχώρι",
+        "Δαμιανό", "Δάφνη", "Δροσερό", "Δυτικό", "Δωροθέα",
+        "Έδεσσα", "Εκκλησιοχώρι", "Ελευθεροχώρι", "Εξαπλάτανος", "Επισκοπή", "Εσωβάλτα",
+        "Ζέρβη",
+        "Θεοδωράκι", "Θηριόπετρα",
+        "Ίδα",
+        "Καισαριανά", "Καλή", "Καλλίπολη", "Καλύβια", "Καρυδιά", "Κάτω Γραμματικό", "Κερασιά", "Κλεισοχώρι", "Κνιδή", "Κορωνίδα", "Κουφάλια", "Κρανέα", "Κρύα Βρύση", "Κωνσταντία",
+        "Λάκκα", "Λεπτοκαρυά", "Λιπαρό", "Λιποχώρι", "Λουτράκι", "Λουτροχώρι", "Λύκοι", "Λυκόστομο",
+        "Μανδαλό", "Μάνδαλο", "Μαργαρίτα", "Μαυροβούνι", "Μεγαπλάτανος", "Μεσημέρι", "Μηλιά", "Μοναστηράκι", "Μυλότοπος",
+        "Νέα Ζωή", "Νέα Πέλλα", "Νέος Μυλότοπος", "Νεοχώρι", "Νησί", "Νότια", "Νταμιανό",
+        "Ξιφιανή",
+        "Όρμα",
+        "Παλαιόφυτο", "Παναγίτσα", "Παραλίμνη", "Πέλλα", "Πενταπλάτανος", "Περαία", "Περίκλεια", "Πεύκωτο", "Πλατάνη", "Πολυκάρπη", "Πολύπετρο", "Πρόδρομος", "Προμαχοί", "Προφήτης Ηλίας",
+        "Ραχώνα", "Ριζάρι", "Ριζό", "Ροδοχώρι",
+        "Σαρακηνοί", "Σεβαστιανά", "Σκύδρα", "Σταυροδρόμι", "Σωσάνδρα",
+        "Τσάκοι", "Τσάκωνες",
+        "Υδραία",
+        "Φλαμουριά", "Φούστανη", "Φυτειά",
+        "Χρυσή",
+        "Ψωμοτόπι"
+    ];
+
+    // Initialize Select2 (Dropdowns με αναζήτηση)
+    $(document).ready(function() {
+        // Γέμισμα λιστών χωριών
+        const villageOptions = PELLA_VILLAGES.sort().map(v => `<option value="${v}">${v}</option>`).join("");
+        $('.village-select').append(villageOptions);
+
+        // Ενεργοποίηση Select2
+        $('.select2-search').select2({ width: '100%', placeholder: "Επιλέξτε..." });
+    });
 
     const DOM = {
         title: document.getElementById("formTitle"),
@@ -176,7 +228,7 @@
         loader: document.getElementById("doctorsListLoader"),
         publicCheck: document.getElementById("publicSectorCheck"),
         publicFields: document.getElementById("publicSectorFields"),
-        affiliation: document.getElementById("affiliationInput"),
+        affiliation: document.getElementById("affiliationInput"), // Πλέον είναι Select
         villages: {
             mon: document.getElementById("villageMon"),
             tue: document.getElementById("villageTue"),
@@ -199,12 +251,13 @@
         const selRadio = document.querySelector('input[name="specialty"]:checked');
         if (selRadio) specialty = (selRadio.value === "Άλλο") ? DOM.specialtyText.value : selRadio.value;
 
+        // Συλλογή τιμών από τα Select2 (jQuery value)
         const villageSchedule = {
-            Mon: DOM.villages.mon.value,
-            Tue: DOM.villages.tue.value,
-            Wed: DOM.villages.wed.value,
-            Thu: DOM.villages.thu.value,
-            Fri: DOM.villages.fri.value
+            Mon: $(DOM.villages.mon).val(),
+            Tue: $(DOM.villages.tue).val(),
+            Wed: $(DOM.villages.wed).val(),
+            Thu: $(DOM.villages.thu).val(),
+            Fri: $(DOM.villages.fri).val()
         };
 
         const doctorData = {
@@ -216,7 +269,7 @@
             email: DOM.email.value,
             specialties: [specialty].filter(Boolean),
             notes: DOM.notes.value,
-            affiliation: DOM.publicCheck.checked ? DOM.affiliation.value : "",
+            affiliation: DOM.publicCheck.checked ? $(DOM.affiliation).val() : "",
             villageSchedule: DOM.publicCheck.checked ? villageSchedule : {}
         };
 
@@ -225,226 +278,153 @@
         this.disabled = true;
 
         fetch(SCRIPT_URL, {
-            method: "POST",
-            mode: "no-cors", 
-            headers: { "Content-Type": "application/json" },
+            method: "POST", mode: "no-cors", headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ doctors: [doctorData] }) 
         })
         .then(() => {
             alert(editingId ? "✅ Ενημερώθηκε!" : "✅ Αποθηκεύτηκε!");
             resetEditing();
-            this.innerText = originalText;
-            this.disabled = false;
+            this.innerText = originalText; this.disabled = false;
             loadDoctors();
         })
         .catch(err => {
-            console.error(err);
-            alert("❌ Σφάλμα.");
-            this.innerText = originalText;
-            this.disabled = false;
+            console.error(err); alert("❌ Σφάλμα.");
+            this.innerText = originalText; this.disabled = false;
         });
     });
 
-    // 2. LOAD DOCTORS (Με Clickable Map Link)
+    // 2. LOAD DOCTORS
     function loadDoctors() {
-        DOM.loader.style.display = "block";
-        DOM.listContainer.innerHTML = "";
-
-        fetch(SCRIPT_URL) 
-            .then(res => res.json())
-            .then(data => {
-                DOM.loader.style.display = "none";
-                if (!data || data.length === 0) {
-                    DOM.listContainer.innerHTML = "<p style='text-align:center; color:#999;'>Κενή λίστα.</p>";
-                    return;
-                }
+        DOM.loader.style.display = "block"; DOM.listContainer.innerHTML = "";
+        fetch(SCRIPT_URL).then(res => res.json()).then(data => {
+            DOM.loader.style.display = "none";
+            if (!data || data.length === 0) { DOM.listContainer.innerHTML = "<p style='text-align:center; color:#999;'>Κενή λίστα.</p>"; return; }
+            
+            data.forEach(doc => {
+                const card = document.createElement("div"); card.className = "doctor-card";
+                const spec = (doc.specialties && doc.specialties.length) ? doc.specialties.join(", ") : "Χωρίς ειδικότητα";
+                const phones = [doc.mobile, doc.landline].filter(Boolean).join(" • ");
                 
-                data.forEach(doc => {
-                    const card = document.createElement("div");
-                    card.className = "doctor-card";
-                    const spec = (doc.specialties && doc.specialties.length) ? doc.specialties.join(", ") : "Χωρίς ειδικότητα";
-                    const phones = [doc.mobile, doc.landline].filter(Boolean).join(" • ");
-                    
-                    let publicInfo = "";
-                    if(doc.affiliation) publicInfo += `<p style="color:#e67e22; font-weight:bold;"><i class="fas fa-hospital"></i> ${doc.affiliation}</p>`;
+                let publicInfo = "";
+                if(doc.affiliation) publicInfo += `<p style="color:#e67e22; font-weight:bold;"><i class="fas fa-hospital"></i> ${doc.affiliation}</p>`;
+                if(doc.villageSchedule && Object.values(doc.villageSchedule).some(v=>v)) {
+                   // Εμφάνιση προγράμματος συνοπτικά
+                   const days = [];
+                   if(doc.villageSchedule.Mon) days.push("Δευ: "+doc.villageSchedule.Mon);
+                   if(doc.villageSchedule.Tue) days.push("Τρι: "+doc.villageSchedule.Tue);
+                   if(doc.villageSchedule.Wed) days.push("Τετ: "+doc.villageSchedule.Wed);
+                   if(doc.villageSchedule.Thu) days.push("Πεμ: "+doc.villageSchedule.Thu);
+                   if(doc.villageSchedule.Fri) days.push("Παρ: "+doc.villageSchedule.Fri);
+                   publicInfo += `<p style="font-size:12px; color:#555; margin-top:2px;"><i>${days.join(" | ")}</i></p>`;
+                }
 
-                    // Δημιουργία Google Maps Link
-                    // Αν δεν υπάρχει διεύθυνση, βάζουμε το όνομα για αναζήτηση
-                    const mapQuery = encodeURIComponent((doc.address || "") + " " + doc.name);
-                    const mapUrl = `https://www.google.com/maps/search/?api=1&query=${mapQuery}`;
+                const mapQuery = encodeURIComponent((doc.address || "") + " " + doc.name);
+                const mapUrl = `https://www.google.com/maps/search/?api=1&query=${mapQuery}`;
 
-                    card.innerHTML = `
-                        <button class="edit-btn" title="Επεξεργασία"><i class="fas fa-pencil-alt"></i></button>
-                        <div class="doc-header">
-                            <h3>${doc.name}</h3>
-                            <span class="doc-spec">${spec}</span>
-                        </div>
-                        <div class="doc-details">
-                            ${publicInfo}
-                            <p>
-                                <a href="${mapUrl}" target="_blank" class="map-link" title="Άνοιγμα στο Google Maps">
-                                    <i class="fas fa-map-marker-alt"></i> ${doc.address || "Χωρίς διεύθυνση"}
-                                </a>
-                            </p>
-                            <p><i class="fas fa-phone"></i> ${phones || "-"}</p>
-                        </div>
-                    `;
-                    
-                    card.querySelector(".edit-btn").addEventListener("click", () => editDoctor(doc));
-                    DOM.listContainer.appendChild(card);
-                });
-            })
-            .catch(err => {
-                DOM.loader.style.display = "none";
-                DOM.listContainer.innerHTML = "<p style='color:red;'>Σφάλμα.</p>";
+                card.innerHTML = `
+                    <button class="edit-btn" title="Επεξεργασία"><i class="fas fa-pencil-alt"></i></button>
+                    <div class="doc-header"><h3>${doc.name}</h3><span class="doc-spec">${spec}</span></div>
+                    <div class="doc-details">
+                        ${publicInfo}
+                        <p><a href="${mapUrl}" target="_blank" class="map-link"><i class="fas fa-map-marker-alt"></i> ${doc.address || "Χωρίς διεύθυνση"}</a></p>
+                        <p><i class="fas fa-phone"></i> ${phones || "-"}</p>
+                    </div>
+                `;
+                card.querySelector(".edit-btn").addEventListener("click", () => editDoctor(doc));
+                DOM.listContainer.appendChild(card);
             });
+        }).catch(() => { DOM.loader.style.display = "none"; DOM.listContainer.innerHTML = "<p>Σφάλμα.</p>"; });
     }
 
-    // 3. EDIT & RESET
+    // 3. EDIT
     function editDoctor(doc) {
         editingId = doc.id;
         DOM.title.innerHTML = `<i class="fas fa-edit"></i> Επεξεργασία: ${doc.name}`;
-        DOM.submitBtn.innerText = "Ενημέρωση Ιατρού";
-        DOM.submitBtn.style.backgroundColor = "#e67e22";
+        DOM.submitBtn.innerText = "Ενημέρωση Ιατρού"; DOM.submitBtn.style.backgroundColor = "#e67e22";
         DOM.cancelBtn.style.display = "block";
 
-        DOM.name.value = doc.name || "";
-        DOM.address.value = doc.address || "";
-        DOM.mobile.value = doc.mobile || "";
-        DOM.landline.value = doc.landline || "";
-        DOM.email.value = doc.email || "";
-        DOM.notes.value = doc.notes || "";
+        DOM.name.value = doc.name || ""; DOM.address.value = doc.address || "";
+        DOM.mobile.value = doc.mobile || ""; DOM.landline.value = doc.landline || "";
+        DOM.email.value = doc.email || ""; DOM.notes.value = doc.notes || "";
 
         const spec = (doc.specialties && doc.specialties.length) ? doc.specialties[0] : "";
         const radio = document.querySelector(`input[name="specialty"][value="${spec}"]`);
-        if (radio) { 
-            radio.checked = true; 
-            DOM.specialtyText.style.display = "none"; 
-        } else if (spec) { 
-            document.getElementById("radioOther").checked = true; 
-            DOM.specialtyText.value = spec; 
-            DOM.specialtyText.style.display = "block"; 
-        }
+        if (radio) { radio.checked = true; DOM.specialtyText.style.display = "none"; } 
+        else if (spec) { document.getElementById("radioOther").checked = true; DOM.specialtyText.value = spec; DOM.specialtyText.style.display = "block"; }
 
-        if (doc.affiliation || (doc.villageSchedule && Object.keys(doc.villageSchedule).length > 0)) {
-            DOM.publicCheck.checked = true;
-            DOM.publicFields.style.display = "block";
-            DOM.affiliation.value = doc.affiliation || "";
+        if (doc.affiliation || (doc.villageSchedule && Object.values(doc.villageSchedule).some(v=>v))) {
+            DOM.publicCheck.checked = true; DOM.publicFields.style.display = "block";
+            // Set Select2 values
+            $(DOM.affiliation).val(doc.affiliation).trigger('change');
             if (doc.villageSchedule) {
-                DOM.villages.mon.value = doc.villageSchedule.Mon || "";
-                DOM.villages.tue.value = doc.villageSchedule.Tue || "";
-                DOM.villages.wed.value = doc.villageSchedule.Wed || "";
-                DOM.villages.thu.value = doc.villageSchedule.Thu || "";
-                DOM.villages.fri.value = doc.villageSchedule.Fri || "";
+                $(DOM.villages.mon).val(doc.villageSchedule.Mon).trigger('change');
+                $(DOM.villages.tue).val(doc.villageSchedule.Tue).trigger('change');
+                $(DOM.villages.wed).val(doc.villageSchedule.Wed).trigger('change');
+                $(DOM.villages.thu).val(doc.villageSchedule.Thu).trigger('change');
+                $(DOM.villages.fri).val(doc.villageSchedule.Fri).trigger('change');
             }
         } else {
-            DOM.publicCheck.checked = false;
-            DOM.publicFields.style.display = "none";
+            DOM.publicCheck.checked = false; DOM.publicFields.style.display = "none";
         }
         window.scrollTo({ top: 0, behavior: 'smooth' });
     }
 
     function resetEditing() {
         editingId = null;
-        clearForm();
+        DOM.name.value = ""; DOM.address.value = ""; DOM.mobile.value = ""; DOM.landline.value = ""; DOM.email.value = ""; DOM.notes.value = ""; DOM.specialtyText.value = "";
+        
+        // Reset Select2s
+        $(DOM.affiliation).val("").trigger('change');
+        $('.village-select').val("").trigger('change');
+        
+        DOM.publicCheck.checked = false; DOM.publicFields.style.display = "none";
+        document.querySelectorAll('input[name="specialty"]').forEach(r => r.checked = false);
         DOM.title.innerHTML = `<i class="fas fa-user-md"></i> Νέος Ιατρός`;
-        DOM.submitBtn.innerText = "Αποθήκευση Ιατρού";
-        DOM.submitBtn.style.backgroundColor = "#34a853";
+        DOM.submitBtn.innerText = "Αποθήκευση Ιατρού"; DOM.submitBtn.style.backgroundColor = "#34a853";
         DOM.cancelBtn.style.display = "none";
     }
 
-    // Tools
-    let timeoutId = null;
-    const listDiv = document.createElement("div");
-    listDiv.id = "suggestions-list";
-    DOM.name.parentNode.appendChild(listDiv);
-
+    // --- Helpers (Autocomplete, Enrich, Map) ---
+    // (Ο κώδικας για autocomplete παραμένει ίδιος)
+    let timeoutId = null; const listDiv = document.createElement("div"); listDiv.id = "suggestions-list"; DOM.name.parentNode.appendChild(listDiv);
     DOM.name.addEventListener("input", function() {
-        const query = this.value.trim();
-        if (query.length < 2) { listDiv.style.display = "none"; return; }
-        clearTimeout(timeoutId);
-        timeoutId = setTimeout(() => {
-            fetch(`${SCRIPT_URL}?action=searchContacts&query=${encodeURIComponent(query)}`)
-                .then(res => res.json()).then(renderSuggestions).catch(console.error);
+        const query = this.value.trim(); if (query.length < 2) { listDiv.style.display = "none"; return; }
+        clearTimeout(timeoutId); timeoutId = setTimeout(() => {
+            fetch(`${SCRIPT_URL}?action=searchContacts&query=${encodeURIComponent(query)}`).then(res=>res.json()).then(renderSuggestions);
         }, 300);
     });
-
     DOM.btnEnrich.addEventListener("click", function() {
-        const query = DOM.name.value.trim() || DOM.mobile.value.trim();
-        if (!query) return alert("Συμπληρώστε όνομα.");
+        const query = DOM.name.value.trim() || DOM.mobile.value.trim(); if (!query) return alert("Συμπληρώστε όνομα.");
         toggleLoading(this, true);
-        fetch(`${SCRIPT_URL}?action=enrich&query=${encodeURIComponent(query)}`)
-            .then(res => res.json()).then(data => {
-                toggleLoading(this, false);
-                if (data.found) fillForm(data); else alert("Δεν βρέθηκε επαφή.");
-            }).catch(() => { toggleLoading(this, false); alert("Error."); });
-    });
-
-    DOM.btnMap.addEventListener("click", function() {
-        const name = DOM.name.value.trim();
-        if (!name) return alert("Συμπληρώστε όνομα.");
-        let spec = "";
-        const s = document.querySelector('input[name="specialty"]:checked');
-        if(s) spec = (s.value === "Άλλο") ? DOM.specialtyText.value : s.value;
-        const query = name + " " + spec;
-        toggleLoading(this, true);
-        fetch(`${SCRIPT_URL}?action=getAddress&query=${encodeURIComponent(query)}`)
-            .then(res => res.json()).then(data => {
-                toggleLoading(this, false);
-                if(data.found && data.address) DOM.address.value = data.address;
-                else alert("Δεν βρέθηκε ακριβής διεύθυνση.");
-            }).catch(() => { toggleLoading(this, false); alert("Error."); });
-    });
-
-    function renderSuggestions(list) {
-        listDiv.innerHTML = "";
-        if(!list || !list.length) { listDiv.style.display = "none"; return; }
-        list.forEach(p => {
-            const div = document.createElement("div");
-            div.className = "suggestion-item";
-            div.innerHTML = `<b>${p.name}</b><br><small>${p.specialty || ""} ${p.mobile || ""}</small>`;
-            div.addEventListener("click", () => { fillForm(p); listDiv.style.display = "none"; });
-            listDiv.appendChild(div);
+        fetch(`${SCRIPT_URL}?action=enrich&query=${encodeURIComponent(query)}`).then(res=>res.json()).then(data => {
+            toggleLoading(this, false); if (data.found) fillForm(data); else alert("Δεν βρέθηκε επαφή.");
         });
+    });
+    DOM.btnMap.addEventListener("click", function() {
+        const name = DOM.name.value.trim(); if (!name) return alert("Συμπληρώστε όνομα.");
+        let spec = ""; const s = document.querySelector('input[name="specialty"]:checked'); if(s) spec = (s.value === "Άλλο") ? DOM.specialtyText.value : s.value;
+        const query = name + " " + spec; toggleLoading(this, true);
+        fetch(`${SCRIPT_URL}?action=getAddress&query=${encodeURIComponent(query)}`).then(res=>res.json()).then(data => {
+            toggleLoading(this, false); if(data.found && data.address) DOM.address.value = data.address; else alert("Δεν βρέθηκε.");
+        });
+    });
+    function renderSuggestions(list) {
+        listDiv.innerHTML = ""; if(!list || !list.length) { listDiv.style.display = "none"; return; }
+        list.forEach(p => { const div = document.createElement("div"); div.className = "suggestion-item"; div.innerHTML = `<b>${p.name}</b><br><small>${p.specialty||""}</small>`; div.addEventListener("click", ()=>{ fillForm(p); listDiv.style.display = "none"; }); listDiv.appendChild(div); });
         listDiv.style.display = "block";
     }
-
     function fillForm(data) {
-        if(data.name) DOM.name.value = data.name;
-        if(data.address) DOM.address.value = data.address;
-        if(data.mobile) DOM.mobile.value = data.mobile;
-        if(data.landline) DOM.landline.value = data.landline;
-        if(data.email) DOM.email.value = data.email;
-        if(data.notes) DOM.notes.value = data.notes;
+        if(data.name) DOM.name.value = data.name; if(data.address) DOM.address.value = data.address; if(data.mobile) DOM.mobile.value = data.mobile; if(data.landline) DOM.landline.value = data.landline; if(data.email) DOM.email.value = data.email; if(data.notes) DOM.notes.value = data.notes;
         if (data.specialty) {
             const radio = document.querySelector(`input[name="specialty"][value="${data.specialty}"]`);
-            if (radio) { radio.checked = true; DOM.specialtyText.style.display = "none"; }
-            else { document.getElementById("radioOther").checked = true; DOM.specialtyText.value = data.specialty; DOM.specialtyText.style.display = "block"; }
+            if (radio) { radio.checked = true; DOM.specialtyText.style.display = "none"; } else { document.getElementById("radioOther").checked = true; DOM.specialtyText.value = data.specialty; DOM.specialtyText.style.display = "block"; }
         }
     }
-
-    function clearForm() {
-        DOM.name.value = ""; DOM.address.value = ""; DOM.mobile.value = ""; 
-        DOM.landline.value = ""; DOM.email.value = ""; DOM.notes.value = ""; DOM.specialtyText.value = "";
-        DOM.affiliation.value = "";
-        DOM.villages.mon.value = ""; DOM.villages.tue.value = ""; DOM.villages.wed.value = "";
-        DOM.villages.thu.value = ""; DOM.villages.fri.value = "";
-        DOM.publicCheck.checked = false; DOM.publicFields.style.display = "none";
-        document.querySelectorAll('input[name="specialty"]').forEach(r => r.checked = false);
-    }
-
-    function toggleLoading(btn, isLoading) {
-        if(isLoading) { btn.dataset.html = btn.innerHTML; btn.innerHTML = '<i class="fas fa-spinner"></i>'; btn.disabled = true; }
-        else { btn.innerHTML = btn.dataset.html; btn.disabled = false; }
-    }
-
-    document.querySelectorAll('input[name="specialty"]').forEach(r => {
-        r.addEventListener('change', (e) => DOM.specialtyText.style.display = (e.target.value === "Άλλο") ? "block" : "none");
-    });
+    function toggleLoading(btn, isLoading) { if(isLoading) { btn.dataset.html = btn.innerHTML; btn.innerHTML = '<i class="fas fa-spinner"></i>'; btn.disabled = true; } else { btn.innerHTML = btn.dataset.html; btn.disabled = false; } }
+    document.querySelectorAll('input[name="specialty"]').forEach(r => { r.addEventListener('change', (e) => DOM.specialtyText.style.display = (e.target.value === "Άλλο") ? "block" : "none"); });
     document.addEventListener("click", (e) => { if (!DOM.name.contains(e.target) && !listDiv.contains(e.target)) listDiv.style.display = "none"; });
 
     window.addEventListener("DOMContentLoaded", loadDoctors);
 </script>
-
 </body>
 </html>
