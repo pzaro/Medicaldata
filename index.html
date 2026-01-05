@@ -33,7 +33,6 @@
         .specialty-container { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 5px; }
         .radio-label { display: flex; align-items: center; cursor: pointer; font-size: 13px; background: #f8f9fa; padding: 8px 12px; border-radius: 20px; border: 1px solid #dee2e6; transition: background 0.2s; }
         .radio-label:hover { background: #e9ecef; }
-        /* Στυλ όταν επιλεγεί */
         input[type="radio"]:checked + span { font-weight: bold; color: #1a73e8; }
         input[type="radio"] { margin-right: 8px; }
 
@@ -77,9 +76,9 @@
         <label>Διεύθυνση Ιατρείου</label>
         <div class="input-group-container">
             <div class="input-wrapper">
-                <input type="text" id="addressInput" placeholder="Αυτόματη εύρεση...">
+                <input type="text" id="addressInput" placeholder="Οδός, Αριθμός, Περιοχή">
             </div>
-            <button id="btnMapSearch" class="btn-tool btn-map" title="Εύρεση Διεύθυνσης"><i class="fas fa-map-marker-alt"></i></button>
+            <button id="btnMapSearch" class="btn-tool btn-map" title="Εύρεση Διεύθυνσης στο Google Maps"><i class="fas fa-map-marker-alt"></i></button>
         </div>
     </div>
 
@@ -129,7 +128,7 @@
 </div>
 
 <script>
-    // --- ΡΥΘΜΙΣΗ URL (Βεβαιώσου ότι είναι το σωστό από το Deploy) ---
+    // --- ΡΥΘΜΙΣΗ URL (Βεβαιώσου ότι είναι το σωστό) ---
     const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbx_WDKl8szlAPfnchH_1dlBSbFn_EFYcZiHVWTYglciGpH4IzhnBXau9GdLy6Ivuly-/exec";
 
     // DOM Elements
@@ -257,7 +256,7 @@
         }, 300);
     });
 
-    // Event: Enrich (Blue Button)
+    // Event: Enrich (Blue Button) - Ψάχνει στις επαφές
     DOM.btnEnrich.addEventListener("click", function() {
         const query = DOM.name.value.trim() || DOM.mobile.value.trim();
         if (!query) return alert("Συμπληρώστε όνομα.");
@@ -269,22 +268,21 @@
             }).catch(() => { toggleLoading(this, false); alert("Error."); });
     });
 
-    // Event: Auto Address (Map Button)
+    // Event: MAP BUTTON (ΕΠΙΣΤΡΟΦΗ ΣΤΟ ΑΝΟΙΓΜΑ TAB)
     DOM.btnMap.addEventListener("click", function() {
         const name = DOM.name.value.trim();
         if (!name) return alert("Συμπληρώστε όνομα.");
+        
         let spec = "";
         const s = document.querySelector('input[name="specialty"]:checked');
         if(s) spec = (s.value === "Άλλο") ? DOM.specialtyText.value : s.value;
+
+        // Φτιάχνουμε Link για Google Maps Search
+        const searchTerm = name + " " + spec + " ιατρείο";
+        const mapUrl = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(searchTerm)}`;
         
-        toggleLoading(this, true);
-        // Ψάχνουμε "Όνομα Ειδικότητα Ιατρείο"
-        fetch(`${SCRIPT_URL}?action=getAddress&query=${encodeURIComponent(name + " " + spec)}`)
-            .then(res => res.json()).then(data => {
-                toggleLoading(this, false);
-                if(data.found && data.address) DOM.address.value = data.address;
-                else alert("Δεν βρέθηκε διεύθυνση.");
-            }).catch(() => { toggleLoading(this, false); alert("Error."); });
+        // Ανοίγουμε σε νέα καρτέλα
+        window.open(mapUrl, '_blank');
     });
 
     // Helpers
@@ -310,13 +308,11 @@
         if(data.notes) DOM.notes.value = data.notes;
         
         if (data.specialty) {
-            // Προσπαθούμε να βρούμε αν υπάρχει η ειδικότητα στα Radio buttons
             const radio = document.querySelector(`input[name="specialty"][value="${data.specialty}"]`);
             if (radio) { 
                 radio.checked = true; 
                 DOM.specialtyText.style.display = "none"; 
             } else { 
-                // Αν δεν υπάρχει, τσεκάρουμε "Άλλο" και τη γράφουμε
                 document.getElementById("radioOther").checked = true; 
                 DOM.specialtyText.value = data.specialty; 
                 DOM.specialtyText.style.display = "block"; 
