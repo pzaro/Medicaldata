@@ -3,50 +3,59 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Καταχώρηση Ιατρού</title>
+    <title>Medical Data App</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
-        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; background-color: #f0f2f5; display: flex; justify-content: center; padding: 20px; }
-        .main-container { background: #fff; padding: 30px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); width: 100%; max-width: 500px; }
+        /* --- ΓΕΝΙΚΟ ΣΤΥΛ --- */
+        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; background-color: #f0f2f5; margin: 0; padding: 20px; display: flex; flex-direction: column; align-items: center; }
+        .main-container { background: #fff; padding: 30px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); width: 100%; max-width: 600px; margin-bottom: 30px; }
         h2 { text-align: center; color: #1a73e8; margin-bottom: 25px; }
+
+        /* --- ΦΟΡΜΑ --- */
         .form-group { margin-bottom: 15px; position: relative; }
         label { display: block; margin-bottom: 8px; font-weight: 600; color: #333; }
-        input[type="text"], input[type="email"] { width: 100%; padding: 12px; border: 2px solid #e0e0e0; border-radius: 8px; font-size: 14px; transition: border-color 0.3s; box-sizing: border-box; }
+        input[type="text"], input[type="email"] { width: 100%; padding: 12px; border: 2px solid #e0e0e0; border-radius: 8px; font-size: 14px; box-sizing: border-box; transition: 0.3s; }
         input:focus { border-color: #1a73e8; outline: none; }
-        .input-group-container { display: flex; gap: 10px; align-items: stretch; }
+        .input-group-container { display: flex; gap: 10px; }
         .input-wrapper { flex: 1; position: relative; }
 
-        /* Κουμπιά */
-        .btn-enrich, .btn-map {
-            display: flex; align-items: center; justify-content: center;
-            color: white; border: none; border-radius: 8px;
-            width: 45px; cursor: pointer; font-size: 18px; transition: background-color 0.2s;
-            flex-shrink: 0;
-        }
-        .btn-enrich { background-color: #1a73e8; }
-        .btn-enrich:hover { background-color: #155db5; }
-        .btn-map { background-color: #ea4335; }
-        .btn-map:hover { background-color: #c5221f; }
-        .fa-spinner { animation: spin 1s linear infinite; }
-        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+        /* Κουμπιά Εργαλείων */
+        .btn-tool { width: 45px; height: 45px; display: flex; align-items: center; justify-content: center; color: white; border: none; border-radius: 8px; cursor: pointer; font-size: 18px; flex-shrink: 0; transition: 0.2s; }
+        .btn-enrich { background-color: #1a73e8; } .btn-enrich:hover { background-color: #155db5; }
+        .btn-map { background-color: #ea4335; } .btn-map:hover { background-color: #c5221f; }
+        
+        /* Autocomplete List */
+        #suggestions-list { position: absolute; top: 100%; left: 0; right: 0; background: white; border: 1px solid #e0e0e0; border-top: none; border-radius: 0 0 8px 8px; max-height: 200px; overflow-y: auto; z-index: 1000; display: none; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
+        .suggestion-item { padding: 10px; cursor: pointer; border-bottom: 1px solid #eee; }
+        .suggestion-item:hover { background: #f5faff; }
+        
+        /* Radio Buttons (Ειδικότητες) */
+        .specialty-container { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 5px; }
+        .radio-label { display: flex; align-items: center; cursor: pointer; font-size: 13px; background: #f8f9fa; padding: 8px 12px; border-radius: 20px; border: 1px solid #dee2e6; transition: background 0.2s; }
+        .radio-label:hover { background: #e9ecef; }
+        /* Στυλ όταν επιλεγεί */
+        input[type="radio"]:checked + span { font-weight: bold; color: #1a73e8; }
+        input[type="radio"] { margin-right: 8px; }
 
-        /* Autocomplete */
-        #suggestions-list {
-            position: absolute; top: 100%; left: 0; right: 0;
-            background: white; border: 1px solid #e0e0e0; border-top: none;
-            border-radius: 0 0 8px 8px; max-height: 250px; overflow-y: auto;
-            z-index: 1000; box-shadow: 0 4px 6px rgba(0,0,0,0.1); display: none;
-        }
-        .suggestion-item { padding: 12px; cursor: pointer; border-bottom: 1px solid #eee; }
-        .suggestion-item:hover { background-color: #f5faff; }
-        .suggestion-main { font-weight: 600; font-size: 15px; }
-        .suggestion-sub { font-size: 13px; color: #666; }
-
-        .specialty-container { display: flex; flex-direction: column; gap: 8px; margin-top: 10px; }
-        .radio-label { display: flex; align-items: center; cursor: pointer; font-size: 14px; }
-        input[type="radio"] { margin-right: 10px; transform: scale(1.2); cursor: pointer; }
-        .btn-submit { width: 100%; padding: 12px; background-color: #34a853; color: white; border: none; border-radius: 8px; font-size: 16px; font-weight: bold; cursor: pointer; margin-top: 20px; }
+        /* Κουμπί Αποθήκευσης */
+        .btn-submit { width: 100%; padding: 14px; background-color: #34a853; color: white; border: none; border-radius: 8px; font-size: 16px; font-weight: bold; cursor: pointer; margin-top: 20px; }
         .btn-submit:hover { background-color: #2c8f45; }
+        .btn-submit:disabled { background-color: #ccc; cursor: not-allowed; }
+
+        /* --- ΛΙΣΤΑ ΙΑΤΡΩΝ (DATABASE VIEW) --- */
+        .db-container { width: 100%; max-width: 600px; margin-top: 20px; }
+        .doctor-card { background: white; padding: 15px; margin-bottom: 10px; border-radius: 8px; border-left: 5px solid #1a73e8; box-shadow: 0 2px 5px rgba(0,0,0,0.05); }
+        .doc-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 5px; }
+        .doc-header h3 { margin: 0; font-size: 16px; color: #333; }
+        .doc-spec { font-size: 13px; background: #e8f0fe; color: #1a73e8; padding: 2px 8px; border-radius: 10px; font-weight: 600; }
+        .doc-details p { margin: 3px 0; font-size: 14px; color: #555; }
+        .doc-details i { width: 20px; color: #888; text-align: center; }
+        
+        .refresh-btn { background: none; border: none; color: #1a73e8; cursor: pointer; font-weight: bold; margin-bottom: 10px; float: right; }
+        
+        /* Spinner */
+        .fa-spinner { animation: spin 1s linear infinite; }
+        @keyframes spin { 100% { transform: rotate(360deg); } }
     </style>
 </head>
 <body>
@@ -60,9 +69,7 @@
             <div class="input-wrapper">
                 <input type="text" id="nameInput" placeholder="π.χ. Παπαδόπουλος Γεώργιος" autocomplete="off">
             </div>
-            <button id="btnEnrich" class="btn-enrich" title="Ανάκτηση από Επαφές">
-                <i class="fas fa-cloud-download-alt"></i>
-            </button>
+            <button id="btnEnrich" class="btn-tool btn-enrich" title="Ανάκτηση από Επαφές"><i class="fas fa-cloud-download-alt"></i></button>
         </div>
     </div>
 
@@ -72,13 +79,11 @@
             <div class="input-wrapper">
                 <input type="text" id="addressInput" placeholder="Αυτόματη εύρεση...">
             </div>
-            <button id="btnMapSearch" class="btn-map" title="Αυτόματη εύρεση διεύθυνσης από Google Maps">
-                <i class="fas fa-map-marker-alt"></i>
-            </button>
+            <button id="btnMapSearch" class="btn-tool btn-map" title="Εύρεση Διεύθυνσης"><i class="fas fa-map-marker-alt"></i></button>
         </div>
     </div>
 
-    <div class="form-group input-group-container">
+    <div class="input-group-container form-group">
         <div class="input-wrapper">
             <label>Κινητό</label>
             <input type="text" id="mobileInput" placeholder="69...">
@@ -97,23 +102,37 @@
     <div class="form-group">
         <label>Ειδικότητα</label>
         <div class="specialty-container">
-            <label class="radio-label"><input type="radio" name="specialty" value="Παθολόγος"> Παθολόγος</label>
-            <label class="radio-label"><input type="radio" name="specialty" value="Καρδιολόγος"> Καρδιολόγος</label>
-            <label class="radio-label"><input type="radio" name="specialty" value="Γεν. Οικ. Ιατρός"> Γεν. Οικ. Ιατρός</label>
-            <label class="radio-label"><input type="radio" name="specialty" value="Παιδίατρος"> Παιδίατρος</label>
-            <label class="radio-label"><input type="radio" name="specialty" value="Άλλο" id="radioOther"> Άλλο</label>
+            <label class="radio-label"><input type="radio" name="specialty" value="Γενικός Ιατρός"> <span>Γενικός Ιατρός</span></label>
+            <label class="radio-label"><input type="radio" name="specialty" value="Καρδιολόγος"> <span>Καρδιολόγος</span></label>
+            <label class="radio-label"><input type="radio" name="specialty" value="Γεν. Χειρουργός"> <span>Γεν. Χειρουργός</span></label>
+            <label class="radio-label"><input type="radio" name="specialty" value="Αγγειολόγος /Χειρουργός"> <span>Αγγειολόγος /Χειρουργός</span></label>
+            <label class="radio-label"><input type="radio" name="specialty" value="Πνευμονολόγος"> <span>Πνευμονολόγος</span></label>
+            <label class="radio-label"><input type="radio" name="specialty" value="Παθολόγος"> <span>Παθολόγος</span></label>
+            <label class="radio-label"><input type="radio" name="specialty" value="Ορθοπεδικός"> <span>Ορθοπεδικός</span></label>
+            <label class="radio-label"><input type="radio" name="specialty" value="Γυναικολόγος"> <span>Γυναικολόγος</span></label>
+            <label class="radio-label"><input type="radio" name="specialty" value="Άλλο" id="radioOther"> <span>Άλλο</span></label>
         </div>
-        <input type="text" id="specialtyText" placeholder="Γράψτε την ειδικότητα..." style="margin-top:10px; display:none;">
+        <input type="text" id="specialtyText" placeholder="Γράψτε την ειδικότητα..." style="margin-top:10px; display:none; width:100%;">
     </div>
 
-    <input type="hidden" id="notesInput">
-    <button class="btn-submit">Αποθήκευση Ιατρού</button>
+    <input type="hidden" id="notesInput"> <button class="btn-submit" id="submitBtn">Αποθήκευση Ιατρού</button>
+</div>
+
+<div class="db-container">
+    <div style="overflow: hidden; margin-bottom: 10px;">
+        <h3 style="float:left; margin:0;">🗂️ Βάση Δεδομένων</h3>
+        <button class="refresh-btn" onclick="loadDoctors()">🔄 Ανανέωση</button>
+    </div>
+    <div id="doctorsListLoader" style="display:none; text-align:center; padding:20px;"><i class="fas fa-spinner fa-2x"></i></div>
+    <div id="doctorsListContainer">
+        </div>
 </div>
 
 <script>
-    // --- ΡΥΘΜΙΣΗ: ΤΟ URL ΣΟΥ ---
-    const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyR7sUA7ZqlI4WXQYekMnaFISSJPIaGDeCXT7KQ-MJqIserLcjWeKpaGSQ7y4QfIbS2/exec";
+    // --- ΡΥΘΜΙΣΗ URL (Βεβαιώσου ότι είναι το σωστό από το Deploy) ---
+    const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbx_WDKl8szlAPfnchH_1dlBSbFn_EFYcZiHVWTYglciGpH4IzhnBXau9GdLy6Ivuly-/exec";
 
+    // DOM Elements
     const DOM = {
         name: document.getElementById("nameInput"),
         address: document.getElementById("addressInput"),
@@ -122,18 +141,112 @@
         email: document.getElementById("emailInput"),
         notes: document.getElementById("notesInput"),
         specialtyText: document.getElementById("specialtyText"),
-        radioOther: document.getElementById("radioOther"),
+        submitBtn: document.getElementById("submitBtn"),
         btnEnrich: document.getElementById("btnEnrich"),
         btnMap: document.getElementById("btnMapSearch"),
-        submitBtn: document.querySelector(".btn-submit")
+        listContainer: document.getElementById("doctorsListContainer"),
+        loader: document.getElementById("doctorsListLoader")
     };
 
+    // --- 1. ΑΠΟΘΗΚΕΥΣΗ ΔΕΔΟΜΕΝΩΝ (POST) ---
+    DOM.submitBtn.addEventListener("click", function() {
+        // Συλλογή δεδομένων
+        const name = DOM.name.value.trim();
+        if (!name) return alert("Παρακαλώ συμπληρώστε τουλάχιστον το όνομα.");
+
+        let specialty = "";
+        const selRadio = document.querySelector('input[name="specialty"]:checked');
+        if (selRadio) specialty = (selRadio.value === "Άλλο") ? DOM.specialtyText.value : selRadio.value;
+
+        // Δημιουργία αντικειμένου ιατρού
+        const doctorData = {
+            id: Date.now(), 
+            name: name,
+            address: DOM.address.value,
+            mobile: DOM.mobile.value,
+            landline: DOM.landline.value,
+            email: DOM.email.value,
+            specialties: [specialty].filter(Boolean),
+            notes: DOM.notes.value
+        };
+
+        // UI Feedback
+        const originalText = this.innerText;
+        this.innerText = "⏳ Αποθήκευση...";
+        this.disabled = true;
+
+        // Αποστολή στο Script
+        fetch(SCRIPT_URL, {
+            method: "POST",
+            mode: "no-cors", 
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ doctors: [doctorData] }) 
+        })
+        .then(() => {
+            alert("✅ Ο ιατρός αποθηκεύτηκε!");
+            clearForm();
+            this.innerText = originalText;
+            this.disabled = false;
+            loadDoctors(); // Ανανέωση λίστας
+        })
+        .catch(err => {
+            console.error(err);
+            alert("❌ Σφάλμα αποθήκευσης.");
+            this.innerText = originalText;
+            this.disabled = false;
+        });
+    });
+
+    // --- 2. ΦΟΡΤΩΣΗ ΛΙΣΤΑΣ ΙΑΤΡΩΝ (GET) ---
+    function loadDoctors() {
+        DOM.loader.style.display = "block";
+        DOM.listContainer.innerHTML = "";
+
+        fetch(SCRIPT_URL) 
+            .then(res => res.json())
+            .then(data => {
+                DOM.loader.style.display = "none";
+                if (!data || data.length === 0) {
+                    DOM.listContainer.innerHTML = "<p style='text-align:center; color:#999;'>Κανένας ιατρός.</p>";
+                    return;
+                }
+                
+                // Render List
+                data.forEach(doc => {
+                    const card = document.createElement("div");
+                    card.className = "doctor-card";
+                    
+                    const spec = (doc.specialties && doc.specialties.length) ? doc.specialties.join(", ") : "Χωρίς ειδικότητα";
+                    const phones = [doc.mobile, doc.landline].filter(Boolean).join(" • ");
+                    
+                    card.innerHTML = `
+                        <div class="doc-header">
+                            <h3>${doc.name}</h3>
+                            <span class="doc-spec">${spec}</span>
+                        </div>
+                        <div class="doc-details">
+                            <p><i class="fas fa-map-marker-alt"></i> ${doc.address || "-"}</p>
+                            <p><i class="fas fa-phone"></i> ${phones || "-"}</p>
+                        </div>
+                    `;
+                    DOM.listContainer.appendChild(card);
+                });
+            })
+            .catch(err => {
+                DOM.loader.style.display = "none";
+                DOM.listContainer.innerHTML = "<p style='color:red; text-align:center;'>Σφάλμα φόρτωσης λίστας.</p>";
+            });
+    }
+
+    // --- 3. ΛΕΙΤΟΥΡΓΙΕΣ (Autocomplete, Enrich, Map) ---
+    
+    // Autocomplete Setup
     let timeoutId = null;
     const listDiv = document.createElement("div");
     listDiv.id = "suggestions-list";
     DOM.name.parentNode.appendChild(listDiv);
 
-    // 1. AUTOCOMPLETE
+    // Event: Autocomplete Typing
     DOM.name.addEventListener("input", function() {
         const query = this.value.trim();
         if (query.length < 2) { listDiv.style.display = "none"; return; }
@@ -144,68 +257,44 @@
         }, 300);
     });
 
-    // 2. ENRICH (ΜΠΛΕ ΚΟΥΜΠΙ)
+    // Event: Enrich (Blue Button)
     DOM.btnEnrich.addEventListener("click", function() {
         const query = DOM.name.value.trim() || DOM.mobile.value.trim();
-        if (!query) return alert("Συμπληρώστε Όνομα για αναζήτηση.");
+        if (!query) return alert("Συμπληρώστε όνομα.");
         toggleLoading(this, true);
         fetch(`${SCRIPT_URL}?action=enrich&query=${encodeURIComponent(query)}`)
-            .then(res => res.json())
-            .then(data => {
+            .then(res => res.json()).then(data => {
                 toggleLoading(this, false);
-                if (data.found) fillForm(data);
-                else alert("Δεν βρέθηκε επαφή.");
-            })
-            .catch(() => { toggleLoading(this, false); alert("Σφάλμα."); });
+                if (data.found) fillForm(data); else alert("Δεν βρέθηκε επαφή.");
+            }).catch(() => { toggleLoading(this, false); alert("Error."); });
     });
 
-    // 3. AUTO ADDRESS (ΚΟΥΜΠΙ ΧΑΡΤΗ) - ΤΩΡΑ ΑΥΤΟΜΑΤΟ
+    // Event: Auto Address (Map Button)
     DOM.btnMap.addEventListener("click", function() {
         const name = DOM.name.value.trim();
-        if (!name) return alert("Συμπληρώστε πρώτα το όνομα.");
+        if (!name) return alert("Συμπληρώστε όνομα.");
+        let spec = "";
+        const s = document.querySelector('input[name="specialty"]:checked');
+        if(s) spec = (s.value === "Άλλο") ? DOM.specialtyText.value : s.value;
         
-        let specialty = "";
-        const sel = document.querySelector('input[name="specialty"]:checked');
-        if (sel) specialty = (sel.value === "Άλλο") ? DOM.specialtyText.value : sel.value;
-        
-        // Ψάχνουμε "Όνομα Ειδικότητα Πόλη(προαιρετικά)"
-        const query = name + " " + specialty;
-        
-        toggleLoading(this, true); // Δείξε spinner
-        
-        // Καλούμε το Script για Geocoding
-        fetch(`${SCRIPT_URL}?action=getAddress&query=${encodeURIComponent(query)}`)
-            .then(res => res.json())
-            .then(data => {
+        toggleLoading(this, true);
+        // Ψάχνουμε "Όνομα Ειδικότητα Ιατρείο"
+        fetch(`${SCRIPT_URL}?action=getAddress&query=${encodeURIComponent(name + " " + spec)}`)
+            .then(res => res.json()).then(data => {
                 toggleLoading(this, false);
-                if (data.found && data.address) {
-                    DOM.address.value = data.address; // ΓΕΜΙΣΜΑ ΠΕΔΙΟΥ!
-                } else {
-                    alert("Δεν βρέθηκε ακριβής διεύθυνση. Δοκιμάστε να γράψετε και την πόλη δίπλα στο όνομα.");
-                }
-            })
-            .catch(() => { toggleLoading(this, false); alert("Σφάλμα σύνδεσης με Χάρτες."); });
+                if(data.found && data.address) DOM.address.value = data.address;
+                else alert("Δεν βρέθηκε διεύθυνση.");
+            }).catch(() => { toggleLoading(this, false); alert("Error."); });
     });
 
     // Helpers
-    function toggleLoading(btn, isLoading) {
-        if (isLoading) {
-            btn.dataset.original = btn.innerHTML;
-            btn.innerHTML = '<i class="fas fa-spinner"></i>';
-            btn.disabled = true;
-        } else {
-            btn.innerHTML = btn.dataset.original;
-            btn.disabled = false;
-        }
-    }
-
     function renderSuggestions(list) {
         listDiv.innerHTML = "";
-        if (!list || !list.length) { listDiv.style.display = "none"; return; }
+        if(!list || !list.length) { listDiv.style.display = "none"; return; }
         list.forEach(p => {
             const div = document.createElement("div");
             div.className = "suggestion-item";
-            div.innerHTML = `<div class="suggestion-main">${p.name}</div><div class="suggestion-sub">${[p.specialty, p.mobile].filter(Boolean).join(" • ")}</div>`;
+            div.innerHTML = `<b>${p.name}</b><br><small>${p.specialty || ""} ${p.mobile || ""}</small>`;
             div.addEventListener("click", () => { fillForm(p); listDiv.style.display = "none"; });
             listDiv.appendChild(div);
         });
@@ -219,22 +308,40 @@
         if(data.landline) DOM.landline.value = data.landline;
         if(data.email) DOM.email.value = data.email;
         if(data.notes) DOM.notes.value = data.notes;
+        
         if (data.specialty) {
+            // Προσπαθούμε να βρούμε αν υπάρχει η ειδικότητα στα Radio buttons
             const radio = document.querySelector(`input[name="specialty"][value="${data.specialty}"]`);
-            if (radio) { radio.checked = true; DOM.specialtyText.style.display = "none"; }
-            else { DOM.radioOther.checked = true; DOM.specialtyText.value = data.specialty; DOM.specialtyText.style.display = "block"; }
+            if (radio) { 
+                radio.checked = true; 
+                DOM.specialtyText.style.display = "none"; 
+            } else { 
+                // Αν δεν υπάρχει, τσεκάρουμε "Άλλο" και τη γράφουμε
+                document.getElementById("radioOther").checked = true; 
+                DOM.specialtyText.value = data.specialty; 
+                DOM.specialtyText.style.display = "block"; 
+            }
         }
     }
-    
-    // UI Events
+
+    function clearForm() {
+        DOM.name.value = ""; DOM.address.value = ""; DOM.mobile.value = ""; 
+        DOM.landline.value = ""; DOM.email.value = ""; DOM.notes.value = ""; DOM.specialtyText.value = "";
+        document.querySelectorAll('input[name="specialty"]').forEach(r => r.checked = false);
+    }
+
+    function toggleLoading(btn, isLoading) {
+        if(isLoading) { btn.dataset.html = btn.innerHTML; btn.innerHTML = '<i class="fas fa-spinner"></i>'; btn.disabled = true; }
+        else { btn.innerHTML = btn.dataset.html; btn.disabled = false; }
+    }
+
     document.querySelectorAll('input[name="specialty"]').forEach(r => {
-        r.addEventListener('change', (e) => {
-            DOM.specialtyText.style.display = (e.target.value === "Άλλο") ? "block" : "none";
-        });
+        r.addEventListener('change', (e) => DOM.specialtyText.style.display = (e.target.value === "Άλλο") ? "block" : "none");
     });
-    document.addEventListener("click", (e) => {
-        if (!DOM.name.contains(e.target) && !listDiv.contains(e.target)) listDiv.style.display = "none";
-    });
+    document.addEventListener("click", (e) => { if (!DOM.name.contains(e.target) && !listDiv.contains(e.target)) listDiv.style.display = "none"; });
+
+    // Εκκίνηση: Φόρτωση λίστας
+    window.addEventListener("DOMContentLoaded", loadDoctors);
 </script>
 
 </body>
